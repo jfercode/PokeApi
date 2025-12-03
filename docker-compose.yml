@@ -1,0 +1,48 @@
+
+services:
+  
+  # ===== CONTAINER 01 FRONTEND ===== #
+  frontend: 
+    build:
+      context: ./frontend  
+      dockerfile: Dockerfile
+    container_name: pokeapi-frontend
+    ports: 
+      - "5173:5173"
+    volumes: 
+      - ./frontend:/app   
+      - /app/node_modules
+    environment:
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+    command: npm run dev
+    networks:
+      - pokeapi-network
+    depends_on:
+      - backend
+
+  # ===== CONTAINER 02 BACKEND ===== #
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pokeapi-backend
+    ports:
+     - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
+    env_file:
+      - .env
+    command: npm run dev
+    networks:
+      - pokeapi-network
+    
+# ===== INTERNAL NETWORK ===== #
+networks:
+  pokeapi-network:
+    driver: bridge
+
+    

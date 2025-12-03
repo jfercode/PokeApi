@@ -1,0 +1,20 @@
+# Dependencias (librerías bajadas, ocupan mucho espacio)
+node_modules/
+*/node_modules/
+
+# Variables de entorno (SECRETOS - NUNCA SUBIR)
+.env
+.env.local
+
+# Archivos compilados (basura generada)
+dist/
+build/
+*/dist/
+*/build/
+
+# IDE (configuración personal)
+.vscode/
+.idea/
+
+# Logs (archivos de error)
+npm-debug.log*
