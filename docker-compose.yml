@@ -1,48 +1,45 @@
 
 services:
-  
-  # ===== CONTAINER 01 FRONTEND ===== #
-  frontend: 
+  frontend:
+    # Nombre del contenedor para fácil referencia
+    container_name: pokeapi_frontend
+    # Indica dónde está el Dockerfile para construir la imagen
     build:
-      context: ./frontend  
+      context: .
       dockerfile: Dockerfile
-    container_name: pokeapi-frontend
-    ports: 
+    # Monta el código local (el subdirectorio 'app') en el directorio de trabajo del contenedor
+    volumes:
+      - ./app:/app
+    # Mapea el puerto 5173 del contenedor al puerto 5173 de tu máquina
+    ports:
       - "5173:5173"
-    volumes: 
-      - ./frontend:/app   
-      - /app/node_modules
-    environment:
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
-    command: npm run dev
-    networks:
-      - pokeapi-network
+    # Mantener el contenedor en ejecución para que podamos usar 'make shell' o 'make dev'
+    tty: true
+    stdin_open: true
+    # Comando para iniciar el servidor de desarrollo
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend
 
-  # ===== CONTAINER 02 BACKEND ===== #
   backend:
+    # Nombre del contenedor para fácil referencia
+    container_name: pokeapi_backend
+    # Indica dónde está el Dockerfile del backend
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: pokeapi-backend
-    ports:
-     - "3000:3000"
+    # Monta el código del backend
     volumes:
       - ./backend:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PORT}
+    # Mapea el puerto 3000 del contenedor
+    ports:
+      - "3000:3000"
+    # Variables de entorno desde .env
     env_file:
       - .env
-    command: npm run dev
-    networks:
-      - pokeapi-network
-    
-# ===== INTERNAL NETWORK ===== #
-networks:
-  pokeapi-network:
-    driver: bridge
-
-    
+    # Mantener el contenedor en ejecución
+    tty: true
+    stdin_open: true
+    # Comando para iniciar el servidor backend
+    command: sh -c "npm install && npm run dev"
