@@ -129,6 +129,7 @@ CMD_INIT := set -e; \
 	cd /app; \
 	npm install; \
 	npm install -D tailwindcss@3.4.17 postcss@8.4.49 autoprefixer@10.4.20; \
+	npm install react-router-dom; \
 	npx tailwindcss init -p; \
 	printf "%s\n" "export default {" "  plugins: {" "    tailwindcss: {}," "    autoprefixer: {}," "  }," "};" > postcss.config.js; \
 	printf "%s\n" "/** @type {import(\"tailwindcss\").Config} */" "export default {" "  content: [" "    \"./index.html\"," "    \"./src/**/*.{js,ts,jsx,tsx}\"," "  ]," "  theme: {" "    extend: {}," "  }," "  plugins: []," "};" > tailwind.config.js; \

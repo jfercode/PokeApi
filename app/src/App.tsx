@@ -1,23 +1,43 @@
-import './App.css'
+import { Route, Routes } from "react-router-dom";
+import "./App.css";
 
+import Home from "./pages/Home";
+import Create from "./pages/Create";
+
+// Componente raíz de la aplicación
+// Sistema de navegación SPA con React Router
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-500 to-yellow-400 flex items-center justify-center p-4">
-      {/* Clases de Tailwind explicadas:
-          - min-h-screen: altura mínima de pantalla
-          - bg-gradient: fondo degradado rojo a amarillo
-          - flex items-center justify-center: centra contenido
-          - p-4: padding (espacio)
-      */}
-      <div className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">PokeAPI</h1>
-        <p className="text-gray-600 mb-6">Create your custom Pokemon combinations</p>
-        <div className="animate-bounce">
-          <span className="text-5xl">🔴</span>
-        </div>
-      </div>
-    </div>
-  )
+   
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/create" element={<Create />} />
+    </Routes>
+    );
 }
 
-export default App
+export default App;
+
+/**
+ * APP.tsx
+ * ═══════════════════════════════════════════════════════════════
+ * 
+ * QUÉ ES:
+ * App.tsx = El componente principal de la app.
+ * Es lo primero que ve el usuario cuando abre la web.
+ * 
+ * IMPORTS (línea 1-4):
+ * - Routes, Route: Sistema de navegación (React Router)
+ * 
+ * FUNCIÓN APP (línea 8-40):
+ * return <Routes> 
+ *   └─ <Route path="/">
+ *       └─ Aquí va el JSX que se ve en pantalla
+ * 
+ * CÓMO FUNCIONA:
+ * 1. Usuario abre la app → URL es /
+ * 2. React Router busca <Route path="/">
+ * 3. Encuentra y renderiza el JSX adentro
+ * 4. En pantalla ve: Header + 2 Selectores + Botón ⚡
+ * 
+ */
