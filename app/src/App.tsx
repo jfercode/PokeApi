@@ -1,4 +1,5 @@
 import './App.css'
+import PokemonSelector from './PokemonSelector'
 
 function App() {
   return (
@@ -9,12 +10,11 @@ function App() {
           - flex items-center justify-center: centra contenido
           - p-4: padding (espacio)
       */}
-      <div className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-md">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">PokeAPI</h1>
-        <p className="text-gray-600 mb-6">Create your custom Pokemon combinations</p>
-        <div className="animate-bounce">
-          <span className="text-5xl">🔴</span>
-        </div>
+      <div className="text-center max-w-2xl w-full">
+        <h1 className="text-5xl font-bold text-white mb-2 drop-shadow-lg">PokeAPI</h1>
+        <p className="text-white text-lg mb-8 drop-shadow">Create your custom Pokemon combinations</p>
+        
+        <PokemonSelector />
       </div>
     </div>
   )
