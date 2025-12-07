@@ -12,6 +12,11 @@ interface PokemonListResponse {
   results: Pokemon[]
 }
 
+// Utility function to capitalize the first letter of a string
+const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 function PokemonSelector() {
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([])
   const [selectedPokemon, setSelectedPokemon] = useState<string>('')
@@ -83,7 +88,7 @@ function PokemonSelector() {
                 <option value="">-- Select a Pokémon --</option>
                 {pokemonList.map((pokemon) => (
                   <option key={pokemon.name} value={pokemon.name}>
-                    {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
+                    {capitalize(pokemon.name)}
                   </option>
                 ))}
               </select>
@@ -94,7 +99,7 @@ function PokemonSelector() {
                 <p className="text-center text-gray-800">
                   <span className="font-semibold">Selected:</span>{' '}
                   <span className="text-xl font-bold text-red-600">
-                    {selectedPokemon.charAt(0).toUpperCase() + selectedPokemon.slice(1)}
+                    {capitalize(selectedPokemon)}
                   </span>
                 </p>
               </div>
