@@ -13,16 +13,20 @@ function Home() {
       style={{ backgroundImage: "url(/lab-background.png)" }}
     >
       {/* Contenedor con título e intro */}
-      <div className="monitor-screen p-8 rounded-lg shadow-2xl text-center max-w-md absolute left-1/2 transform -translate-x-1/2">
+      <div className="monitor-screen p-8 rounded-lg shadow-2xl text-center w-full">
         <Header titulo="PokéCreator" />
-      {/* Botones con Links */}
-      <div className="flex gap-4 flex-wrap justify-center text-yellow-400 pokemon-font-small">
-        <Link to="/create">🔀 Crear Fusión</Link>
-        <Link to="/gallery">🖼️ Galería</Link>
-        <Link to="/login">🔐 Login</Link>
-      </div>
-      </div>
 
+        {/* Texto descriptivo */}
+        <p className="mt-4 text-yellow-400 font-mono text-sm">
+          Crea tu propio Pokémon con IA_
+        </p>
+
+        {/* Botones con Links */}
+        <div className="flex gap-4 flex-wrap justify-center text-yellow-400 pokemon-font-small mt-8">
+          <Link to="/create">🔀 Crear Fusión</Link>
+          <Link to="/gallery">🖼️ Galería</Link>
+        </div>
+      </div>
     </div>
   );
 }

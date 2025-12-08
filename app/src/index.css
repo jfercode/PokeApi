@@ -315,3 +315,17 @@ body {
   /* Simula que está iluminada dentro del cilindro */
   filter: drop-shadow(0 0 5px rgba(100, 200, 255, 0.6));
 }
+
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

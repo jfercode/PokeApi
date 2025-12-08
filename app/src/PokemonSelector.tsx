@@ -1,92 +1,193 @@
 /**
- * Componente selector de Pokémon
- * Permite eligir un Pokémon de la lista
+ * Componente PokemonSelector - Mini Pokédex
+ * Muestra nombre, imagen, número y datos del Pokémon
  */
 
 import { useState, useEffect } from "react";
 
 interface PokemonSelectorProps {
-  label: string; // "Pokémon 1" o "Pokémon 2"
+  label: string;
+  onSelect?: (name: string, image: string, pokemonData: any) => void;
 }
 
-// Interfaz con nombre y sprite del Pokemon
 interface PokemonDetail {
+  id: number;
   name: string;
   sprites: {
     front_default: string;
   };
+  height: number;
+  weight: number;
+  types: Array<{
+    type: { name: string };
+  }>;
+  abilities: Array<{
+    ability: { name: string };
+    is_hidden: boolean;
+  }>;
 }
 
 function PokemonSelector(props: PokemonSelectorProps) {
-  // Estado para guardar la lista de pokémon
   const [pokemons, setPokemons] = useState([]);
-
-  // Estado para guardar el pokémon seleccionado
   const [selectedPokemon, setSelectedPokemon] = useState("");
+  const [pokemonDetail, setPokemonDetail] = useState<PokemonDetail | null>(null);
 
-  // Estado para guardar los detalles del pokémon seleccionado
-  const [pokemonDetail, setPokemonDetail] = useState(null);
-
-  // Traer pokémon cuando el componente carga
+  // Traer lista de pokémon
   useEffect(() => {
-    console.log("Obteniendo pokémons desde PokeApi...");
-
-    // Petición a la API
     fetch("https://pokeapi.co/api/v2/pokemon?limit=1328")
-      .then((response) => response.json()) // Convierte respuesta a JSON
+      .then((response) => response.json())
       .then((data) => {
-        console.log("Pokémon recibidos:", data.results);
-        setPokemons(data.results); // Guarda en el estado
+        setPokemons(data.results);
       });
   }, []);
 
+  // Traer detalles del pokémon seleccionado
   useEffect(() => {
-    console.log("Obteniendo nombre y sprite de [", selectedPokemon, "]");
-
     if (selectedPokemon) {
+      console.log("Detalles pokemon [", selectedPokemon, "]")
       fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemon}`)
         .then((response) => response.json())
-        .then((data) => {
-          console.log("Datos recibidos de [", selectedPokemon, "]: ", data);
+        .then((data: PokemonDetail) => {
           setPokemonDetail(data);
+          // Pasar datos completos al parent (Create.tsx)
+          if (props.onSelect && data.sprites?.front_default) {
+            props.onSelect(selectedPokemon, data.sprites.front_default, data);
+          }
         });
     }
-  }, [selectedPokemon]);
+  }, [selectedPokemon, props]);
+
+  // Obtener tipos del Pokémon
+  const getTypes = () => {
+    if (!pokemonDetail?.types) return "";
+    return pokemonDetail.types
+      .map((t) => t.type.name.toUpperCase())
+      .join(" / ");
+  };
+
+  // Convertir altura de decímetros a metros
+  const getHeight = () => {
+    if (!pokemonDetail?.height) return "N/A";
+    return (pokemonDetail.height * 0.1).toFixed(2) + "m";
+  };
+
+  // Convertir peso de hectogramos a kg
+  const getWeight = () => {
+    if (!pokemonDetail?.weight) return "N/A";
+    return (pokemonDetail.weight * 0.1).toFixed(2) + "kg";
+  };
+
+  // Número del Pokémon con padding
+  const getPokemonNumber = () => {
+    if (!pokemonDetail?.id) return "000";
+    return pokemonDetail.id.toString().padStart(3, "0");
+  };
+
+  // Obtener habilidades principales (no ocultas)
+  const getAbilities = () => {
+    if (!pokemonDetail?.abilities) return [];
+    return pokemonDetail.abilities
+      .filter((a) => !a.is_hidden)
+      .map((a) => a.ability.name.toUpperCase());
+  };
 
   return (
-    <div className="cloning-machine w-64">
-      {/* Cylinder with Pokemon image */}
-      <div className="cylinder">
-        {pokemonDetail && pokemonDetail.sprites.front_default ? (
-          <img
-            src={pokemonDetail.sprites.front_default}
-            alt={selectedPokemon}
-            className="pokemon-image"
-          />
-        ) : ( null
-        )}
+    <div className="w-72">
+      {/* MINI POKÉDEX */}
+      {pokemonDetail ? (
+        <div className="pokedex-card bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 shadow-2xl border-4 border-yellow-400">
+          {/* Header con número */}
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-yellow-300 pokemon-font-small text-sm">
+              {pokemonDetail.name.toUpperCase()}
+            </h2>
+            <span className="text-white font-bold text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+              #{getPokemonNumber()}
+            </span>
+          </div>
+
+          {/* Imagen en círculo */}
+          <div className="cylinder mb-6 flex items-center justify-center bg-yellow-100 rounded-full w-40 h-40 mx-auto">
+            <img
+              src={pokemonDetail.sprites.front_default}
+              alt={pokemonDetail.name}
+              className="w-32 h-32 object-contain"
+            />
+          </div>
+
+          {/* Tipos */}
+          <div className="mb-4 text-center">
+            <p className="text-white text-xs font-bold mb-2">TIPO</p>
+            <div className="flex gap-2 justify-center flex-wrap">
+              {pokemonDetail.types.map((type, idx) => (
+                <span
+                  key={idx}
+                  className="bg-yellow-300 text-red-700 px-3 py-1 rounded-full text-xs font-bold"
+                >
+                  {type.type.name.toUpperCase()}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats: Altura y Peso */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-black bg-opacity-30 rounded-lg p-3 text-center">
+              <p className="text-yellow-300 text-xs font-bold">ALTURA</p>
+              <p className="text-white font-bold">{getHeight()}</p>
+            </div>
+            <div className="bg-black bg-opacity-30 rounded-lg p-3 text-center">
+              <p className="text-yellow-300 text-xs font-bold">PESO</p>
+              <p className="text-white font-bold">{getWeight()}</p>
+            </div>
+          </div>
+
+          {/* Habilidades */}
+          <div className="bg-black bg-opacity-30 rounded-lg p-3">
+            <p className="text-yellow-300 text-xs font-bold mb-2">
+              HABILIDADES
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {getAbilities().map((ability, idx) => (
+                <span
+                  key={idx}
+                  className="bg-yellow-200 text-red-700 text-xs px-2 py-1 rounded font-bold"
+                >
+                  {ability}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Mientras no hay selección
+        <div className="pokedex-placeholder bg-gray-700 rounded-2xl p-6 shadow-2xl border-4 border-gray-500 h-96 flex items-center justify-center">
+          <p className="text-white text-center font-mono">
+            Selecciona un Pokémon para ver detalles
+          </p>
+        </div>
+      )}
+
+      {/* Selector dropdown */}
+      <div className="mt-6">
+        <h3 className="text-green-400 text-xs mb-3 pokemon-font-small">
+          {props.label}
+        </h3>
+        <select
+          value={selectedPokemon}
+          onChange={(e) => {
+            setSelectedPokemon(e.target.value);
+          }}
+          className="w-full p-3 bg-black text-green-400 border-2 border-green-500 rounded pokemon-font-small text-xs hover:border-green-300 transition"
+        >
+          <option value="">-- SELECT POKÉMON --</option>
+          {pokemons.map((pokemon: any) => (
+            <option key={pokemon.name} value={pokemon.name}>
+              {pokemon.name.toUpperCase()}
+            </option>
+          ))}
+        </select>
       </div>
-
-      {/* Selector label */}
-      <h3 className="text-green-400 text-xs mb-3 pokemon-font-small mt-2">
-        {props.label}
-      </h3>
-
-      {/* Pokemon dropdown */}
-      <select
-        value={selectedPokemon}
-        onChange={(e) => setSelectedPokemon(e.target.value)}
-        className="w-full p-2 bg-black text-green-400 border-2 border-green-500 rounded pokemon-font-small text-xs"
-      >
-        <option value="">-- Select Pokemon --</option>
-
-        {/* Map creates one option for each Pokemon */}
-        {pokemons.map((pokemon) => (
-          <option key={pokemon.name} value={pokemon.name}>
-            {pokemon.name.toUpperCase()}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }
@@ -94,57 +195,49 @@ function PokemonSelector(props: PokemonSelectorProps) {
 export default PokemonSelector;
 
 /**
- * POKEMONSELECTOR.TSX
+ * POKEMONSELECTOR.TSX - MINI POKÉDEX
  * ═══════════════════════════════════════════════════════════════
- * 
+ *
  * QUÉ ES:
- * PokemonSelector es un componente que:
- * 1. Trae lista de Pokémon de PokeAPI (1328 Pokémon)
- * 2. Muestra un dropdown para seleccionar
- * 3. Cuando selecciona uno, obtiene su imagen (sprite)
- * 4. Muestra la imagen en un "cilindro" (círculo con efecto 3D)
- * 
- * ESTRUCTURA:
- * 1. INTERFACES (tipos de datos):
- *    - PokemonSelectorProps: Las props que recibe (label)
- *    - PokemonDetail: Estructura de datos del Pokémon (name, sprites)
- * 
- * 2. ESTADOS (useState):
- *    - pokemons: Array con lista de todos los Pokémon
- *    - selectedPokemon: String con el nombre del seleccionado
- *    - pokemonDetail: Objeto con datos completos del Pokémon
- * 
- * 3. EFECTOS (useEffect):
- *    - Efecto 1: Se ejecuta al cargar → Trae lista de PokeAPI
- *    - Efecto 2: Se ejecuta al cambiar selectedPokemon → Trae detalles
- * 
- * FLUJO DE DATOS:
- * 1. Componente carga → useEffect 1 se ejecuta
- * 2. Fetch a PokeAPI: https://pokeapi.co/api/v2/pokemon?limit=1328
- * 3. Recibe 1328 Pokémon → setPokemons(data)
- * 4. Dropdown muestra todos los nombres
- * 5. Usuario selecciona uno → onChange → setSelectedPokemon
- * 6. useEffect 2 se ejecuta
- * 7. Fetch a https://pokeapi.co/api/v2/pokemon/{nombre}
- * 8. Recibe datos: name, image URL, stats, tipos, etc
- * 9. setPokemonDetail(data)
- * 10. Renderiza la imagen en el <img>
- * 
- * JSX (lo que renderiza):
- * <div className="cloning-machine"> → Contenedor principal
- *   ├─ <div className="cylinder"> → Círculo para la imagen
- *   │  └─ <img src={imagen}> → Imagen del Pokémon
- *   ├─ <h3>{props.label}</h3> → Etiqueta ("Pokémon 1")
- *   └─ <select> → Dropdown con lista
- * 
- * PROPS:
- * - label (string): "POKÉMON 1" o "POKÉMON 2"
- * 
- * CONCEPTOS CLAVE:
- * - fetch(): Traer datos de internet (API)
- * - .then(): Esperar a que termine y procesar
- * - .json(): Convertir respuesta a objeto JavaScript
- * - useState: Guardar datos en el estado
- * - useEffect: Ejecutar código en momentos específicos
- * - [selectedPokemon]: Dependencia → Ejecuta si cambia
+ * Mini Pokédex que muestra datos detallados de cada Pokémon:
+ * - Nombre y número Pokédex
+ * - Imagen del Pokémon
+ * - Tipos (fuego, agua, planta, etc)
+ * - Altura y peso
+ * - Información de características
+ *
+ * INTERFAZ (PokemonDetail):
+ * - id: número del Pokémon en la Pokédex
+ * - name: nombre del Pokémon
+ * - sprites.front_default: URL de la imagen
+ * - height: altura en decímetros
+ * - weight: peso en hectogramos
+ * - types: array de tipos del Pokémon
+ *
+ * FUNCIONES AUXILIARES:
+ * - getTypes(): Retorna tipos del Pokémon formateados
+ * - getHeight(): Convierte decímetros a metros
+ * - getWeight(): Convierte hectogramos a kg
+ * - getPokemonNumber(): Formatea número con ceros (001, 025, etc)
+ *
+ * FLUJO:
+ * 1. Usuario selecciona Pokémon en dropdown
+ * 2. useEffect obtiene datos de PokeAPI
+ * 3. setPokemonDetail(data) con info completa
+ * 4. onSelect() envía datos completos a parent (Create.tsx)
+ * 5. Renderiza mini Pokédex con todos los datos
+ *
+ * DATOS ENVIADOS AL PARENT:
+ * La función onSelect ahora recibe:
+ * - name: nombre del Pokémon
+ * - image: URL de la imagen
+ * - pokemonData: OBJETO COMPLETO con todos los datos
+ *   └─ Esto permite que Create.tsx use mucha más info para la fusión IA
+ *
+ * ESTILOS:
+ * - Fondo rojo degradado (como Pokédex real)
+ * - Borde amarillo (#ffcc00)
+ * - Imagen en círculo blanco
+ * - Tipos en badges amarillos
+ * - Stats en boxes oscuros
  */
