@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from "react";
+import { data } from "react-router-dom";
 
 interface PokemonSelectorProps {
   label: string;
@@ -25,6 +26,10 @@ interface PokemonDetail {
     ability: { name: string };
     is_hidden: boolean;
   }>;
+  egg_groups?: Array<{
+    name: string;
+    url: string;
+  }>;
 }
 
 function PokemonSelector(props: PokemonSelectorProps) {
@@ -45,17 +50,29 @@ function PokemonSelector(props: PokemonSelectorProps) {
   useEffect(() => {
     if (selectedPokemon) {
       console.log("Detalles pokemon [", selectedPokemon, "]")
-      fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemon}`)
+
+      // Fetch principal - datos del Pokémon
+      const pokeApi = import.meta.env.VITE_POKEAPI_BASE;
+      fetch(`${pokeApi}/pokemon/${selectedPokemon}`)
         .then((response) => response.json())
         .then((data: PokemonDetail) => {
-          setPokemonDetail(data);
-          // Pasar datos completos al parent (Create.tsx)
-          if (props.onSelect && data.sprites?.front_default) {
-            props.onSelect(selectedPokemon, data.sprites.front_default, data);
-          }
+          // Fetch secundario - datos de la especie (egg_groups)
+          return fetch(`${pokeApi}/pokemon-species/${selectedPokemon}`)
+            .then((response) => response.json())
+            .then((speciesData) => {
+              // Combinar ambos datos
+              const completeData = {
+                ...data,
+                egg_groups: speciesData.egg_groups
+              };
+              setPokemonDetail(completeData);
+              if (props.onSelect && data.sprites?.front_default) {
+                props.onSelect(selectedPokemon, data.sprites.front_default, completeData);
+              }
+            });
         });
     }
-  }, [selectedPokemon, props]);
+  }, [selectedPokemon, props.onSelect]);
 
   // Obtener tipos del Pokémon
   const getTypes = () => {
@@ -81,6 +98,12 @@ function PokemonSelector(props: PokemonSelectorProps) {
   const getPokemonNumber = () => {
     if (!pokemonDetail?.id) return "000";
     return pokemonDetail.id.toString().padStart(3, "0");
+  };
+
+  // Obtener grupos de huevo
+  const getEggGroups = () => {
+    if (!pokemonDetail?.egg_groups) return [];
+    return pokemonDetail.egg_groups.map((eg) => eg.name.toUpperCase());
   };
 
   // Obtener habilidades principales (no ocultas)
@@ -141,7 +164,22 @@ function PokemonSelector(props: PokemonSelectorProps) {
               <p className="text-white font-bold">{getWeight()}</p>
             </div>
           </div>
-
+          {/* Grupos de Huevo */}
+          <div className="bg-black bg-opacity-30 rounded-lg p-3 mt-3">
+            <p className="text-yellow-300 text-xs font-bold mb-2">
+              GRUPOS DE HUEVO
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {getEggGroups().map((eggGroup, idx) => (
+                <span
+                  key={idx}
+                  className="bg-purple-300 text-purple-900 text-xs px-2 py-1 rounded font-bold"
+                >
+                  🥚 {eggGroup}
+                </span>
+              ))}
+            </div>
+          </div>
           {/* Habilidades */}
           <div className="bg-black bg-opacity-30 rounded-lg p-3">
             <p className="text-yellow-300 text-xs font-bold mb-2">

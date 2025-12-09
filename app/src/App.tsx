@@ -3,6 +3,7 @@ import "./App.css";
 
 import Home from "./pages/Home";
 import Create from "./pages/Create";
+import Gallery from "./pages/Gallery";
 
 // Componente raíz de la aplicación
 // Sistema de navegación SPA con React Router
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/create" element={<Create />} />
+      <Route path="/gallery" element={<Gallery />} />
     </Routes>
     );
 }
