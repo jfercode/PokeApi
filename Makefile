@@ -6,7 +6,7 @@ COMPOSE_FILE = docker-compose.yml
 
 export PATH := /usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:$(PATH)
 
-.PHONY: all up down fclean remove re logs stop ps ascii help init dev clean-app build shell status resources health restart test info check-env install-backend
+.PHONY: all up down fclean remove re logs stop ps ascii help init dev clean-app build shell status resources health restart test info check-env
 
 ####### COLORES #######
 RED    = \033[0;31m
@@ -152,7 +152,8 @@ init: ascii check-env
 	fi
 	$(call pretty_do,Construyendo imágenes de Docker,$(COMPOSE) -f $(COMPOSE_FILE) build)
 	$(call pretty_do,Configurando proyecto frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c '$(CMD_INIT)')
-	$(call pretty_do,Instalando dependencias del backend (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20')
+	$(call pretty_do,Instalando Google OAuth2 en frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c 'npm install @react-oauth/google')
+	$(call pretty_do,Instalando dependencias del backend (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20 axios')
 	@echo "$(GREEN)✔ Proyecto inicializado exitosamente!$(RESET)"
 	@echo ""
 	@echo "$(CYAN)Estructura del proyecto:$(RESET)"
@@ -282,12 +283,6 @@ health: ascii
 	fi
 
 ####### ALIAS ÚTILES #######
-
-# Instalar dependencias del backend (cuando sea necesario)
-install-backend: ascii
-	$(call pretty_do,Instalando dependencias del backend,cd backend && npm install && npm install jsonwebtoken passport passport-google-oauth20)
-	@echo "$(GREEN)✔ Dependencias del backend instaladas!$(RESET)"
-
 restart: down up
 test: health
 info: status

@@ -5,18 +5,18 @@
 /**
  * LIBRERÍAS
  */
-const jwt = require("jsonwebtoken");    // Crear y verificar JWT tokens
-const axios = require("axios");         // Hacer peticiones HTTP a Google
+const jwt = require("jsonwebtoken"); // Crear y verificar JWT tokens
+const axios = require("axios"); // Hacer peticiones HTTP a Google
 
 /**
  * VARIABLES DE CONFIGURACIÓN
  */
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;                          // ID de aplicación Google
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;                  // Secret de Google (confidencial)
-const JWT_SECRET = process.env.JWT_SECRET;                                      // Clave secreta para firmar tokens
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";                      // Duración del token (7 días por defecto)
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";         // URL del servidor Backend
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";       // URL del servidor Frontend
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID; // ID de aplicación Google
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET; // Secret de Google (confidencial)
+const JWT_SECRET = process.env.JWT_SECRET; // Clave secreta para firmar tokens
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"; // Duración del token (7 días por defecto)
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000"; // URL del servidor Backend
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173"; // URL del servidor Frontend
 
 /**
  * FUNCIONES AUXILIARES
@@ -76,8 +76,7 @@ const googleAuthCallback = async (req, res) => {
   if (!code) {
     return res.status(400).json({ error: "No authorization code" });
   }
-  try 
-  {
+  try {
     // Intercambiar código por token
     const response = await axios.post("https://oauth2.googleapis.com/token", {
       client_id: GOOGLE_CLIENT_ID,
@@ -90,34 +89,109 @@ const googleAuthCallback = async (req, res) => {
     // Obetner información del usuarion
     const userResponse = await axios.get(
       "https://www.googleapis.com/oauth2/v2/userinfo",
-      { heaeders: { Authorization: `Bearer ${response.data.access_token}` } }
+      { headers: { Authorization: `Bearer ${response.data.access_token}` } }
     );
 
     // Usuario
-    const user = 
-    {
-        id: userResponse.data.id,
-        email: userResponse.data.email,
-        name: userResponse.data.name
+    const user = {
+      id: userResponse.data.id,
+      email: userResponse.data.email,
+      name: userResponse.data.name,
     };
 
     // Generación del JWT propio
     const token = generateJWT(user);
 
     // Redirección al frontend
-    res.redirect(`${FRONTEND_URL}?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`);
-
-
+    res.redirect(
+      `${FRONTEND_URL}?token=${token}&user=${encodeURIComponent(
+        JSON.stringify(user)
+      )}`
+    );
   } catch (error) {
     console.log("OAuth error: ", error);
     res.redirect(`${FRONTEND_URL}?error=auth_failed`);
   }
 };
 
-// 3. Logout
+// 3. Validar token de Google y devolver JWT nuestro
+// El frontend envía el token JWT de Google
+// El backend lo valida con Google y devuelve un JWT propio
+const googleTokenValidation = async (req, res) => {
+  const { googleToken } = req.body;
+
+  if (!googleToken) {
+    return res.status(400).json({ error: "No Google token provided" });
+  }
+
+  try {
+    // Decodificar el ID token de Google (es un JWT)
+    // El token tiene formato: header.payload.signature
+    const parts = googleToken.split(".");
+
+    if (parts.length !== 3) {
+      return res.status(400).json({ error: "Invalid token format" });
+    }
+
+    // Decodificar el payload (segunda parte)
+    // Agregar padding si es necesario (= caracteres)
+    let payload = parts[1];
+    payload += "=".repeat(4 - (payload.length % 4));
+
+    const decoded = JSON.parse(Buffer.from(payload, "base64").toString());
+
+    const { email, name, picture, sub } = decoded;
+
+    // Crear usuario object
+    const user = {
+      id: sub,
+      email,
+      name,
+      picture,
+    };
+
+    // Generar nuestro JWT
+    const token = generateJWT(user);
+
+    // Devolver token y datos del usuario
+    res.json({
+      token,
+      user,
+      message: "Successfully authenticated with Google",
+    });
+  } catch (error) {
+    console.error("Google token validation error:", error);
+    res.status(401).json({ error: "Invalid Google token" });
+  }
+};
+
+// 4. Logout
 const logout = (req, res) => {
-    res.json({ message: 'Logged out successfully' });
-}
+  res.json({ message: "Logged out successfully" });
+};
+
+// 4. Middleware de Autenticación
+const authMiddleware = (req, res, next) => {
+  // Obtenicon del token del header authorization
+  const authHeader = req.headers.authorization;
+  if (!authHeader)
+    return res.status(401).json({ error: "No authoritation header " });
+
+  // Separar "Bearer" del token
+  const token = authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "No token provided" });
+
+  // Verificación de la validez del token
+  const decoded = verifyJWT(token);
+  if (!decoded)
+    return res.status(401).json({ error: "Invalid or expired token" });
+
+  // Guardar el usuario en req para poder trabajar con el después
+  req.user = decoded;
+
+  // Pasar al siguiente middleware
+  next();
+};
 
 /**
  * EXPORTS - Funciones disponibles para otros archivos
@@ -125,7 +199,9 @@ const logout = (req, res) => {
 module.exports = {
   generateJWT,
   verifyJWT,
+  googleAuthURL: googleAuthUrl,
   googleAuthCallback,
-  googleAuthUrl,
-  logout
+  googleTokenValidation,
+  logout,
+  authMiddleware,
 };
