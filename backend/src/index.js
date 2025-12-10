@@ -1,35 +1,59 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+/** 
+ *  Configuración inicial 
+ */
+require('dotenv').config();             //  Lectura de variables de entorno
+const express = require('express');     //  Importa express
+const cors = require('cors');           //  Permite la comunicación con el frontend
 
-const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+const { googleAuthURL, googleAuthCallback, logout } = require('./auth');    // Importar funciones de autenticación
 
-// Health check endpoint
+/**
+ *  Creación de la app y configuración del puerto
+ */
+const app = express();                  //  Crea App
+const PORT = process.env.PORT;          //  Configura puerto desde la variables de entorno
+
+/**
+ * Middlewares
+ */
+app.use(cors());            // Habilita CORS
+app.use(express.json());    // El servidor entiende JSON en las peticiones
+
+/**
+ * Health check endpoint
+ */
+// Verificacion del estado del Backend (al acceder a /health)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend is running' });
 });
 
-// Ruta principal
+/**
+ * Ruta principal (/)
+ */
 app.get('/', (req, res) => {
   res.json({ 
     message: 'PokeAPI Backend',
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      api: '/api'
+      api: '/api',
     }
   });
 });
 
-// API routes placeholder
+/**
+ * Api routes placeholder 
+ */
 app.get('/api', (req, res) => {
   res.json({ message: 'API routes coming soon' });
 });
+
+
+app.get('/api/auth/google', googleAuthURL);         // Inicia login con Google
+app.get('/api/auth/callback', googleAuthCallback);  // Google redirige aqui con el código
+app.get('/api/auth/logout', logout);                // Cierre de sesión
+
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {

@@ -6,7 +6,7 @@ services:
     # Indica dónde está el Dockerfile para construir la imagen
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: app/Dockerfile
     # Monta el código local (el subdirectorio 'app') en el directorio de trabajo del contenedor
     volumes:
       - ./app:/app

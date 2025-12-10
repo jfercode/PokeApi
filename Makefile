@@ -6,7 +6,7 @@ COMPOSE_FILE = docker-compose.yml
 
 export PATH := /usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:$(PATH)
 
-.PHONY: all up down fclean remove re logs stop ps ascii help init dev clean-app build shell status resources health restart test info check-env
+.PHONY: all up down fclean remove re logs stop ps ascii help init dev clean-app build shell status resources health restart test info check-env install-backend
 
 ####### COLORES #######
 RED    = \033[0;31m
@@ -144,7 +144,7 @@ clean-app: ascii
 	$(call pretty_do,Limpiando configuración del backend,rm -rf backend/node_modules backend/package-lock.json 2>/dev/null || true)
 	@echo "$(GREEN)✔ Archivos de configuración limpiados. Tu código fuente está seguro.$(RESET)"
 
-# Inicializar proyecto Vite con Tailwind CSS (Typescript + React)
+# Inicializar proyecto Vite con Tailwind CSS (Typescript + React) + Backend
 init: ascii check-env
 	@if [ -f "app/package.json" ]; then \
 		echo "$(YELLOW)⚠ Frontend ya inicializado. Usa 'make clean-app' primero si quieres reinicializar.$(RESET)"; \
@@ -152,12 +152,22 @@ init: ascii check-env
 	fi
 	$(call pretty_do,Construyendo imágenes de Docker,$(COMPOSE) -f $(COMPOSE_FILE) build)
 	$(call pretty_do,Configurando proyecto frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c '$(CMD_INIT)')
+	$(call pretty_do,Instalando dependencias del backend (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20')
 	@echo "$(GREEN)✔ Proyecto inicializado exitosamente!$(RESET)"
 	@echo ""
 	@echo "$(CYAN)Estructura del proyecto:$(RESET)"
-	@echo "  📁 app/       - React + Vite + TypeScript + Tailwind"
-	@echo "  📁 backend/   - Node.js API + OAuth2 + JWT"
-	@echo "  📄 .env       - Variables de entorno ($(RED)NO HACER COMMIT$(RESET))"
+	@echo "  📁 app/       - React + Vite + TypeScript + Tailwind CSS"
+	@echo "  📁 backend/   - Node.js Express + OAuth2 + JWT"
+	@echo "  � .env       - Variables de entorno (Frontend)"
+	@echo "  📁 backend/.env - Variables de entorno (Backend)"
+	@echo ""
+	@echo "$(YELLOW)Próximos pasos:$(RESET)"
+	@echo "  1. Configura GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en backend/.env"
+	@echo "  2. Ejecuta: $(CYAN)make up$(RESET)"
+	@echo "  3. Frontend: $(CYAN)http://localhost:5173$(RESET)"
+	@echo "  4. Backend:  $(CYAN)http://localhost:3000$(RESET)"
+	@echo ""
+	@echo "$(RED)⚠ IMPORTANTE: NO hagas commit de archivos .env$(RESET)"
 	@echo ""
 	@echo "$(YELLOW)Recordatorio de seguridad:$(RESET)"
 	@echo "  • Las API keys están en el archivo .env (solo backend)"
@@ -272,6 +282,11 @@ health: ascii
 	fi
 
 ####### ALIAS ÚTILES #######
+
+# Instalar dependencias del backend (cuando sea necesario)
+install-backend: ascii
+	$(call pretty_do,Instalando dependencias del backend,cd backend && npm install && npm install jsonwebtoken passport passport-google-oauth20)
+	@echo "$(GREEN)✔ Dependencias del backend instaladas!$(RESET)"
 
 restart: down up
 test: health

@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect } from "react";
-import { data } from "react-router-dom";
 
 interface PokemonSelectorProps {
   label: string;
