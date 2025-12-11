@@ -4,18 +4,35 @@ import "./App.css";
 import Home from "./pages/Home";
 import Create from "./pages/Create";
 import Gallery from "./pages/Gallery";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useEffect, useState } from "react";
 
 // Componente raíz de la aplicación
 // Sistema de navegación SPA con React Router
 function App() {
+
   return (
-   
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/create" element={<Create />} />
-      <Route path="/gallery" element={<Gallery />} />
+      {/** Ruta pública: Home */}
+      <Route path="/"
+        element={
+          <Home />} />
+
+      {/** Ruta protegida: Create */}
+      <Route path="/create"
+        element={
+          <ProtectedRoute>
+            <Create />
+          </ProtectedRoute>} />
+
+      {/** Ruta protegida: Protected */}
+      <Route path="/gallery"
+        element={
+          <ProtectedRoute>
+            <Gallery />
+          </ProtectedRoute>} />
     </Routes>
-    );
+  );
 }
 
 export default App;

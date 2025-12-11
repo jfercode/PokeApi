@@ -5,18 +5,18 @@
 /**
  * LIBRERÍAS
  */
-const jwt = require("jsonwebtoken"); // Crear y verificar JWT tokens
-const axios = require("axios"); // Hacer peticiones HTTP a Google
+const jwt = require("jsonwebtoken");    // Crear y verificar JWT tokens
+const axios = require("axios");         // Hacer peticiones HTTP a Google
 
 /**
  * VARIABLES DE CONFIGURACIÓN
  */
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID; // ID de aplicación Google
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET; // Secret de Google (confidencial)
-const JWT_SECRET = process.env.JWT_SECRET; // Clave secreta para firmar tokens
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"; // Duración del token (7 días por defecto)
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000"; // URL del servidor Backend
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173"; // URL del servidor Frontend
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;                      // ID de aplicación Google
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;              // Secret de Google (confidencial)
+const JWT_SECRET = process.env.JWT_SECRET;                                  // Clave secreta para firmar tokens
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";                  // Duración del token (7 días por defecto)
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";     // URL del servidor Backend
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";   // URL del servidor Frontend
 
 /**
  * FUNCIONES AUXILIARES
@@ -172,9 +172,10 @@ const logout = (req, res) => {
 
 // 4. Middleware de Autenticación
 const authMiddleware = (req, res, next) => {
+  
   // Obtenicon del token del header authorization
   const authHeader = req.headers.authorization;
-  if (!authHeader)
+  if (!authHeader || !authHeader.startsWith('Bearer '))
     return res.status(401).json({ error: "No authoritation header " });
 
   // Separar "Bearer" del token

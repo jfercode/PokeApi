@@ -153,29 +153,8 @@ init: ascii check-env
 	$(call pretty_do,Construyendo imágenes de Docker,$(COMPOSE) -f $(COMPOSE_FILE) build)
 	$(call pretty_do,Configurando proyecto frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c '$(CMD_INIT)')
 	$(call pretty_do,Instalando Google OAuth2 en frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c 'npm install @react-oauth/google')
-	$(call pretty_do,Instalando dependencias del backend (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20 axios')
+	$(call pretty_do,Instalando dependencias del backend (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20 axios google-auth-library')
 	@echo "$(GREEN)✔ Proyecto inicializado exitosamente!$(RESET)"
-	@echo ""
-	@echo "$(CYAN)Estructura del proyecto:$(RESET)"
-	@echo "  📁 app/       - React + Vite + TypeScript + Tailwind CSS"
-	@echo "  📁 backend/   - Node.js Express + OAuth2 + JWT"
-	@echo "  � .env       - Variables de entorno (Frontend)"
-	@echo "  📁 backend/.env - Variables de entorno (Backend)"
-	@echo ""
-	@echo "$(YELLOW)Próximos pasos:$(RESET)"
-	@echo "  1. Configura GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en backend/.env"
-	@echo "  2. Ejecuta: $(CYAN)make up$(RESET)"
-	@echo "  3. Frontend: $(CYAN)http://localhost:5173$(RESET)"
-	@echo "  4. Backend:  $(CYAN)http://localhost:3000$(RESET)"
-	@echo ""
-	@echo "$(RED)⚠ IMPORTANTE: NO hagas commit de archivos .env$(RESET)"
-	@echo ""
-	@echo "$(YELLOW)Recordatorio de seguridad:$(RESET)"
-	@echo "  • Las API keys están en el archivo .env (solo backend)"
-	@echo "  • OAuth2 manejado por el backend"
-	@echo "  • JWT tokens para autenticación"
-	@echo ""
-	@echo "Ejecuta $(GREEN)make dev$(RESET) para iniciar los servidores de desarrollo."
 
 # Iniciar servidor de desarrollo
 dev: ascii check-env
@@ -187,7 +166,6 @@ dev: ascii check-env
 	@echo "$(GREEN)✨ Servidores de desarrollo listos!$(RESET)"
 	@echo "  🎨 Frontend:  $(CYAN)http://localhost:5173$(RESET)"
 	@echo "  🔧 Backend:   $(CYAN)http://localhost:3000$(RESET)"
-	@echo "  📚 API Docs:  $(CYAN)http://localhost:3000/api-docs$(RESET) (si está implementado)"
 	@echo ""
 	@echo "$(YELLOW)Consejo:$(RESET) Usa $(GREEN)make logs$(RESET) para ver la salida en vivo"
 	@echo "$(YELLOW)Consejo:$(RESET) Usa $(GREEN)make health$(RESET) para verificar los servicios"

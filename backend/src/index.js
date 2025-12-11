@@ -81,28 +81,34 @@ app.get('/api/user/fusions', authMiddleware, (req, res) =>{
 /**
  *  CRUD ENDPOINTS - Gestión de datos de las Fusiones
  */
-// GET - Obtencion de todas las fusiones del usuario autenticado
+// GET - Obtencion de todas las fusiones del usuario autenticado // TODO Obtener de la db
 app.get('/api/fusions', authMiddleware, (req, res) =>{
-  // TODO Obtener de la db
+  const userId = req.user.id;
+
   res.json({
     message: 'User fusions',
-    userId: req.user.id,
+    userId: userId,
     fusion: []  // cambiar esta linea
   })
 });
 
 // POST - Crear una nueva fusión 
 app.post('/api/fusions', authMiddleware, (req, res) => {
+  
+  const userId = req.user.id;
   const {name, pokemon1, pokemon2, image} = req.body;
 
   if (!name || !pokemon1 || !pokemon2 || !image)
       return res.status(400).json({ error:' Missing required fields' });
 
+  // TODO guardar en la DB aqui
   const fusion = {
     id: Date.now().toString(),
-    userId: req.user.id,
+    userId: userId,
     name,
-    pokemon1, pokemon2, image, 
+    pokemon1,
+    pokemon2,
+    image, 
     createAt: new Date().toISOString()
   };
   res.status(201).json({
@@ -113,14 +119,15 @@ app.post('/api/fusions', authMiddleware, (req, res) => {
 
 // DELETE - Eliminar una fusion existente
 app.delete('/api/fusions/:id', authMiddleware, (req, res) => {
-  const { id } = req.params;
-  // TODO Eliminar de la DB
+
+  const fusionId = req.params.id;
+  const userId = req.user.id;
+  // TODO Validar que la fusión pertenece al usuario y eliminar de la DB
   res.json({
     message: 'Fussion deleted successfully',
-    fusionId: id
+    fusionId: fusionId
   });
 });
-
 
 
 // Start server

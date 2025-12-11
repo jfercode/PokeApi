@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import Header from "../Header"
+import Header from "../components/Header"
+import FusionCard from "../components/FusionCard"
 
 interface Fusion {
     id: string;
@@ -14,7 +15,6 @@ interface Fusion {
 function Gallery() {
 
     const [fusions, setFusions] = useState<Fusion[]>([]);
-
     const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
 
     // Obtención de fusiones guardadas en localStorage 
@@ -80,60 +80,24 @@ function Gallery() {
                     </div>
                 </div>
             ) : (
-                // Si hay fusiones - Mostrar grid
+                // Si hay fusiones - Mostrar grid con FusionCard
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     {fusions.map((fusion) => (
-                        <div key={fusion.id} className="fusion-card bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 shadow-2xl border-4 border-yellow-400">
-                            {/* Imagen */}
-                            <div className="mb-4 flex items-center justify-center bg-yellow-100 rounded-lg h-40">
-                                <img
-                                    src={fusion.image}
-                                    alt={fusion.name}
-                                    className="max-h-40 object-contain"
-                                />
-                            </div>
-
-                            {/* Nombre */}
-                            <h3 className="text-yellow-300 pokemon-font-small text-lg text-center mb-2">
-                                {fusion.name}
-                            </h3>
-
-                            {/* Info */}
-                            <p className="text-green-400 text-xs font-mono text-center mb-2">
-                                {fusion.pokemon1.toUpperCase()} + {fusion.pokemon2.toUpperCase()}
-                            </p>
-
-                            {/* Fecha */}
-                            <p className="text-gray-300 text-xs text-center mb-4">
-                                {new Date(fusion.createdAt).toLocaleDateString("es-ES")}
-                            </p>
-
-                            {/* Botones */}
-                            <div className="flex gap-2 flex-wrap justify-center">
-                                <button
-                                    onClick={() => handleDownload(fusion.image, fusion.name)}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded font-bold transition text-xs"
-                                >
-                                    ⬇️ Descargar
-                                </button>
-                                <button
-                                    onClick={() => handleShare(fusion.image)}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded font-bold transition text-xs"
-                                >
-                                    📤 Compartir
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(fusion.id)}
-                                    className="bg-red-800 hover:bg-red-900 text-white px-3 py-2 rounded font-bold transition text-xs"
-                                >
-                                    🗑️ Eliminar
-                                </button>
-                            </div>
+                        <div key={fusion.id} className="h-full">
+                            <FusionCard
+                                image={fusion.image}
+                                name={fusion.name}
+                                pokemon1={fusion.pokemon1}
+                                pokemon2={fusion.pokemon2}
+                                createdAt={fusion.createdAt}
+                                onDownload={() => handleDownload(fusion.image, fusion.name)}
+                                onShare={() => handleShare(fusion.image)}
+                                onDelete={() => handleDelete(fusion.id)}
+                            />
                         </div>
                     ))}
                 </div>
             )}
-
         </div>
     )
 }
