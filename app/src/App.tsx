@@ -21,9 +21,8 @@ function App() {
       {/** Ruta protegida: Create */}
       <Route path="/create"
         element={
-          <ProtectedRoute>
-            <Create />
-          </ProtectedRoute>} />
+          <Create />}
+      />
 
       {/** Ruta protegida: Protected */}
       <Route path="/gallery"

@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Header from "../components/Header";
-import PokemonSelector from "../PokemonSelector";
+import PokemonSelector from "../components/PokemonSelector";
 import { Link } from "react-router-dom";
 import FusionPanel from "../components/FusionPanel";
 

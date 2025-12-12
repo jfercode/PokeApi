@@ -18,9 +18,9 @@ interface Fusion {
 
 function Home() {
 
-  const [randomFusion, setRandomFusion] = useState<Fusion | null>(null);  // Random image here 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);          // Autenticación
-  const [user, setUser] = useState<any>(null);                           // Usuario autenticado
+  const [randomFusion, setRandomFusion] = useState<Fusion | null>(null);      // Random image here 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);              // Autenticación
+  const [user, setUser] = useState<any>(null);                                // Usuario autenticado
 
   // Función useEffect de generación de fusion aleatoria en el home
   useEffect(() => {
