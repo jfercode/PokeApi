@@ -5,7 +5,6 @@ import Home from "./pages/Home";
 import Create from "./pages/Create";
 import Gallery from "./pages/Gallery";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useEffect, useState } from "react";
 
 // Componente raíz de la aplicación
 // Sistema de navegación SPA con React Router
@@ -18,11 +17,11 @@ function App() {
         element={
           <Home />} />
 
-      {/** Ruta protegida: Create */}
+      {/** Ruta pública: Create */}
       <Route path="/create"
         element={
           <Create />}
-      />
+      />cd
 
       {/** Ruta protegida: Protected */}
       <Route path="/gallery"

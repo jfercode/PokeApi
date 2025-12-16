@@ -6,324 +6,159 @@
 @tailwind components;
 @tailwind utilities;
 
-/**
- * BODY - Estilos base de la página
- * Elimina márgenes/padding por defecto del navegador
- * y aplica anti-aliasing para texto más suave
- */
+:root {
+  /* PALETA NEON RETRO - Pokémon Moderno */
+  --color-primary: #FFD700;           /* Amarillo neón */
+  --color-primary-dark: #FFC700;
+  --color-primary-light: #FFED4E;
+  
+  --color-secondary: #6B21A8;         /* Púrpura */
+  --color-secondary-dark: #581C87;
+  --color-secondary-light: #7C3AED;
+  
+  --color-tertiary: #06B6D4;          /* Cian */
+  --color-tertiary-dark: #0891B2;
+  --color-tertiary-light: #22D3EE;
+  
+  --color-contrast: #ADFF2F;          /* Verde lima */
+  --color-background: #0F172A;        /* Gris oscuro */
+  --color-font: #FFFFFF;              /* Blanco puro */
+  --color-font-secondary: #94A3B8;    /* Gris claro */
+  
+  --color-danger: #EF5350;            /* Rojo logout */
+  --color-danger-dark: #C62828;
+  
+  --color-success: #10B981;           /* Verde éxito */
+}
+
 body {
-  /* Elimina espacios por defecto */
   margin: 0;
   padding: 0;
-  
-  /* Fuente del sistema limpia y moderna */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    sans-serif;
-  
-  /* Suaviza el renderizado del texto */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-font);
 }
 
 /* ============================================================
                     FUENTES Y TIPOGRAFÍA
    ============================================================ */
 
-/**
- * POKEMON TITLE
- * Estilo específico para títulos principales
- * Emula el logo clásico de Pokémon:
- * - Amarillo dorado (#ffcb05)
- * - Borde azul (#3466af)
- * - Efecto de sombra para profundidad
- * - Fuente retro Game Boy
- */
 .pokemon-title {
-  /* Fuente Early GameBoy con fallback a Press Start 2P */
   font-family: "Early GameBoy", "Press Start 2P", monospace;
-  
-  /* Color amarillo dorado característico de Pokémon */
-  color: #ffcb05;
-  
-  /* Borde azul alrededor del texto (webkit = navegadores Chrome/Safari) */
-  -webkit-text-stroke: 1px #3466af;
-  
-  /* Sombras múltiples para efecto 3D de profundidad */
-  text-shadow: 3px 3px 0 #3466af,    /* Sombra inferior-derecha */
-               -1px -1px 0 #3466af,   /* Sombra superior-izquierda */
-               1px -1px 0 #3466af,    /* Sombra superior-derecha */
-               -1px 1px 0 #3466af;    /* Sombra inferior-izquierda */
+  color: var(--color-primary);
+  -webkit-text-stroke: 1px var(--color-secondary);
+  text-shadow: 3px 3px 0 var(--color-secondary),
+               -1px -1px 0 var(--color-secondary),
+               1px -1px 0 var(--color-secondary),
+               -1px 1px 0 var(--color-secondary);
 }
 
-/**
- * POKEMON FONT LARGE
- * Fuente grande para títulos y encabezados secundarios
- * Mantiene el estilo Pokémon pero en tamaño más grande
- * Uso: Títulos de secciones, headers importantes
- */
 .pokemon-font-large {
-  /* Fuente Press Start 2P (píxel art retro) */
   font-family: "Press Start 2P", monospace;
-  
-  /* Tamaño de fuente grande */
   font-size: 1.5rem;
-  
-  /* Espaciado entre letras para efecto retro */
   letter-spacing: 2px;
-  
-  /* Convierte todo a mayúsculas */
   text-transform: uppercase;
-  
-  /* Alto de línea generoso para legibilidad */
   line-height: 1.8;
-  
-  /* Color amarillo Pokémon */
-  color: #ffcb05;
-  
-  /* Borde azul muy fino */
-  -webkit-text-stroke: 0.2px #3466af;
-  
-  /* Efecto de sombra Pokémon */
-  text-shadow: 3px 3px 0 #3466af,
-               -1px -1px 0 #3466af,
-               1px -1px 0 #3466af,
-               -1px 1px 0 #3466af;
+  color: var(--color-primary);
+  -webkit-text-stroke: 0.2px var(--color-secondary);
+  text-shadow: 3px 3px 0 var(--color-secondary),
+               -1px -1px 0 var(--color-secondary),
+               1px -1px 0 var(--color-secondary),
+               -1px 1px 0 var(--color-secondary);
 }
 
-/**
- * POKEMON FONT
- * Fuente estándar para textos normales
- * Mantiene la identidad visual pero legible en tamaño normal
- * Uso: Botones, etiquetas, textos de interfaz
- */
 .pokemon-font {
-  /* Fuente píxel art retro */
   font-family: "Press Start 2P", monospace;
-  
-  /* Tamaño medio */
   font-size: 0.875rem;
-  
-  /* Espaciado moderado */
   letter-spacing: 1px;
-  
-  /* Todo mayúsculas para consistencia visual */
   text-transform: uppercase;
-  
-  /* Color amarillo */
-  color: #ffcb05;
-  
-  /* Borde muy sutil */
-  -webkit-text-stroke: 0.05px #3466af;
-  
-  /* Sombra discreta */
-  text-shadow: 3px 3px 0 #3466af,
-               -1px -1px 0 #3466af,
-               1px -1px 0 #3466af,
-               -1px 1px 0 #3466af;
+  color: var(--color-primary);
+  -webkit-text-stroke: 0.05px var(--color-secondary);
+  text-shadow: 2px 2px 0 var(--color-secondary),
+               -1px -1px 0 var(--color-secondary),
+               1px -1px 0 var(--color-secondary),
+               -1px 1px 0 var(--color-secondary);
 }
 
-/**
- * POKEMON FONT SMALL
- * Fuente pequeña para elementos secundarios
- * Mantiene el estilo pero muy compacto
- * Uso: Labels, textos pequenos, ayuda
- */
 .pokemon-font-small {
-  /* Fuente píxel art */
   font-family: "Press Start 2P", monospace;
-  
-  /* Tamaño pequeño */
   font-size: 0.75rem;
-  
-  /* Espaciado mínimo */
   letter-spacing: 0.5px;
-  
-  /* Color amarillo */
-  color: #ffcb05;
-  
-  /* Borde imperceptible */
-  -webkit-text-stroke: 0.005px #3466af;
-  
-  /* Sombra muy sutil */
-  text-shadow: 2px 2px 0 #3466af,
-               -1px -1px 0 #3466af,
-               1px -1px 0 #3466af,
-               -1px 1px 0 #3466af;
+  color: var(--color-primary);
+  -webkit-text-stroke: 0.005px var(--color-secondary);
+  text-shadow: 2px 2px 0 var(--color-secondary),
+               -1px -1px 0 var(--color-secondary),
+               1px -1px 0 var(--color-secondary),
+               -1px 1px 0 var(--color-secondary);
 }
 
-/**
- * POKEMON FONT CLEAN
- * Variante sin colores específicos
- * Usa solo la fuente, se adapta al contexto del contenedor
- * Uso: Cuando necesitas la fuente pero colores personalizados
- */
 .pokemon-font-clean {
-  /* Fuente píxel art */
   font-family: "Press Start 2P", monospace;
-  
-  /* Tamaño estándar */
   font-size: 0.875rem;
-  
-  /* Espaciado entre letras */
   letter-spacing: 1px;
-  
-  /* Todo mayúsculas */
   text-transform: uppercase;
-  
-  /* Sin color ni sombra - se hereda del padre */
 }
 
 /* ============================================================
                     COMPONENTES DE INTERFAZ
    ============================================================ */
 
-/**
- * MONITOR SCREEN
- * Estilo para pantalla/monitor retro
- * Simula un monitor antiguo con efecto CRT (tubo de rayos catódicos)
- * Características:
- * - Fondo negro profundo
- * - Borde grueso gris
- * - Brillo verde fosforito (simulando monitor antiguo)
- */
 .monitor-screen {
-  /* Fondo completamente negro */
-  background: #0a0a0a;
-  
-  /* Borde grueso gris */
-  border: 10px solid #4a4a4a;
-  
-  /* Bordes redondeados para suavizar */
+  background: var(--color-background);
+  border: 10px solid var(--color-contrast);
   border-radius: 12px;
-  
-  /* Efecto de profundidad con sombras */
   box-shadow: 
-    inset 0 0 20px rgba(0, 255, 0, 0.6),  /* Brillo verde interno */
-    0 0 30px rgba(0, 0, 0, 0.8);           /* Sombra negra externa */
+    inset 0 0 20px rgba(173, 255, 47, 0.3),
+    0 0 30px rgba(0, 0, 0, 0.8);
 }
 
-/* ============================================================
-                        MÁQUINA DE CLONACIÓN
-   ============================================================ */
-
-/**
- * CLONING MACHINE
- * Contenedor principal que simula una máquina de laboratorio Pokémon
- * Características visuales:
- * - Fondo azul degradado (efecto cilíndrico)
- * - Bordes oscuros con profundidad
- * - Espacio central para mostrar el Pokémon
- * - Efectos de brillo de cristal/metal
- */
 .cloning-machine {
-  /* Gradiente azul: claro a oscuro, ángulo 135deg */
-  background: linear-gradient(135deg, #1a5f7a 0%, #0d3f52 100%);
-  
-  /* Bordes oscuros para definir la máquina */
-  border: 6px solid #0a2838;
-  
-  /* Esquinas redondeadas para efecto cilíndrico */
+  background: linear-gradient(135deg, var(--color-tertiary-dark) 0%, var(--color-secondary-dark) 100%);
+  border: 6px solid var(--color-secondary);
   border-radius: 20px;
-  
-  /* Espaciado interno generoso */
   padding: 1.5rem 1rem;
-  
-  /* Efecto de profundidad y brillo */
   box-shadow: 
-    inset 0 0 20px rgba(0, 150, 200, 0.3),  /* Brillo azul interno */
-    0 0 30px rgba(13, 63, 82, 0.5);          /* Sombra oscura externa */
-  
-  /* Posicionamiento relativo para subelementos */
+    inset 0 0 20px rgba(107, 33, 168, 0.3),
+    0 0 30px rgba(15, 23, 42, 0.5);
   position: relative;
-  
-  /* Altura mínima para contener los elementos */
   min-height: 200px;
-  
-  /* Flexbox para distribución vertical */
   display: flex;
   flex-direction: column;
-  
-  /* Centra contenido horizontalmente y verticalmente */
   align-items: center;
   justify-content: center;
 }
 
-/**
- * CYLINDER
- * Forma circular que simula el cristal de la cápsula de clonación
- * Características:
- * - Forma perfectamente circular
- * - Gradiente radial para efecto 3D
- * - Borde azul claro (cristal)
- * - Efectos de brillo para dar vida
- */
 .cylinder {
-  /* Ancho del cilindro */
   width: 120px;
-  
-  /* Alto del cilindro (levemente más alto que ancho) */
   height: 140px;
-  
-  /* Gradiente radial: simula luz reflejada en cristal */
-  /* elipse at 30% 30% = punto de luz en esquina superior-izquierda */
   background: radial-gradient(
     ellipse at 30% 30%,
-    rgba(100, 200, 255, 0.4),  /* Azul claro (luz) */
-    transparent                 /* Transparente en bordes */
+    rgba(100, 200, 255, 0.4),
+    transparent
   );
-  
-  /* Borde azul claro simulando cristal */
-  border: 3px solid #0a9db8;
-  
-  /* Forma circular/ovalada */
+  border: 3px solid var(--color-tertiary);
   border-radius: 50%;
-  
-  /* Flexbox para centrar la imagen */
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* Espacio debajo para el dropdown */
   margin-bottom: 1rem;
-  
-  /* Efecto de brillo de cristal */
   box-shadow: 
-    inset 0 0 15px rgba(0, 150, 200, 0.5),  /* Brillo interno azul */
-    0 0 15px rgba(10, 157, 184, 0.3);        /* Resplandor azul externo */
+    inset 0 0 15px rgba(6, 182, 212, 0.5),
+    0 0 15px rgba(6, 182, 212, 0.3);
 }
 
-/**
- * POKEMON IMAGE
- * Imagen del Pokémon dentro del cilindro
- * Características:
- * - Tamaño fijo para mantener proporción
- * - Object-fit para escalar correctamente
- * - Efecto de brillo azul para integración visual
- */
 .pokemon-image {
-  /* Ancho de la imagen */
   width: 100px;
-  
-  /* Alto de la imagen */
   height: 100px;
-  
-  /* Contiene la imagen sin deformarla */
-  /* Si es más grande, se ajusta; si es más pequeña, mantiene tamaño */
   object-fit: contain;
-  
-  /* Efecto de brillo azul alrededor de la imagen */
-  /* Simula que está iluminada dentro del cilindro */
   filter: drop-shadow(0 0 5px rgba(100, 200, 255, 0.6));
 }
 
-
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-spin {

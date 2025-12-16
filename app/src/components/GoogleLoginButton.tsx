@@ -6,6 +6,7 @@
 
 import { GoogleLogin } from '@react-oauth/google';
 
+
 interface GoogleLoginButtonProps {
   onSuccess: (credentialResponse: any) => void;
   onError?: () => void;
@@ -19,7 +20,7 @@ function GoogleLoginButton({ onSuccess, onError }: GoogleLoginButtonProps) {
         onError={onError}
         text="signin_with"
         size="large"
-        theme="filled_black"
+        theme="filled_blue"
       />
     </div>
   );

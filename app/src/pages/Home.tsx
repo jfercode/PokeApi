@@ -3,9 +3,12 @@
  * Primera página que ve el usuario (ruta /)
  */
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import Header from "../components/Header";
 import GoogleLoginButton from "../components/GoogleLoginButton";
-import { useEffect, useState } from "react";
+import ButtonComponent from "../components/ButtonComponent";
 
 interface Fusion {
   id?: string;
@@ -21,6 +24,7 @@ function Home() {
   const [randomFusion, setRandomFusion] = useState<Fusion | null>(null);      // Random image here 
   const [isAuthenticated, setIsAuthenticated] = useState(false);              // Autenticación
   const [user, setUser] = useState<any>(null);                                // Usuario autenticado
+  const navigate = useNavigate();                                             // Activar navigate (react router dom)
 
   // Función useEffect de generación de fusion aleatoria en el home
   useEffect(() => {
@@ -99,18 +103,17 @@ function Home() {
       // Guardar datos del usuario TAMBIÉN en localStorage
       localStorage.setItem('authUser', JSON.stringify(data.user));
 
-      
+
       // Notificar a App que estamos autenticados
       if (setIsAuthenticated)
         setIsAuthenticated(true);
-      
+
       // Guardar datos del usuario en estado
       setUser(data.user);
 
       alert('✅ Login exitoso', data.user.name);
     }
-    catch (error) 
-    {
+    catch (error) {
       console.error('❌ Error en login:', error)
       alert('Error durante la autenticación');
     }
@@ -128,8 +131,8 @@ function Home() {
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat p-4"
-      style={{ backgroundImage: "url(/lab-background.png)" }}
-    >
+      style={{ background: "var(--background-color)"}}>
+
       {/* Contenedor con título e intro */}
       <div className=" monitor-screen p-8 rounded-lg shadow-2xl text-center w-full">
         <Header titulo="PokéCreator" />
@@ -141,84 +144,98 @@ function Home() {
 
         {/* Botones con Links */}
         <div className="flex gap-4 flex-wrap justify-center text-yellow-400 pokemon-font-small mt-8">
-          <Link to="/create">🔀 Crear Fusión</Link>
-          <Link to="/gallery">🖼️ Galería</Link>
+          <ButtonComponent
+            text="🔀 Crear Fusión"
+            variant="primary"
+            size="small"
+            onClick={() => navigate("/create")} />
         </div>
 
-        {/** Autenticación con Google */}
-        {isAuthenticated ? (
-          <div className="mt-8">
-            <p className="text-yellow-400 pokemon-font-small mb-4">
-              👤 {user?.name}
-            </p>
-            <button
-              onClick={handleLogout}
-              className="text-yellow-400 px-6 py-2 rounded font-bold transition pokemon-font-small"
-            >
-              🚪 Cerrar Sesión
-            </button>
-          </div>
-        ) : (
-          <GoogleLoginButton
-            onSuccess={handleGoogleLogin}
-            onError={() => console.error('Error en login con Google')}
-          />
-        )}
+        {isAuthenticated &&
+          <div className="flex gap-4 flex-wrap justify-center text-yellow-400 pokemon-font-small mt-8">
+            <ButtonComponent
+              text="🖼️ Galería"
+              variant="primary"
+              size="small"
+              onClick={() => navigate("/gallery")}
+            />
+          </div>}
       </div>
 
-      {/* Fusión Aleatoria - Featured */}
-      {
-        randomFusion ? (
-          <div className="flex justify-center mt-12 mb-8">
-            <div className="cloning-machine p-8 rounded-lg shadow-2xl text-center max-w-md border-4 border-yellow-400">
-              <p className="text-yellow-400 pokemon-font-small text-sm mb-4">
-                ✨ Fusión Destacada ✨
-              </p>
+      {/** Autenticación con Google */}
+      {isAuthenticated ? (
+        <div className="mt-8 flex flex-col items-center">
+          <p className= "pokemon-font-large mb-4">
+            👤 {user?.name}
+          </p>
+          <ButtonComponent
+            text="🚪 Logout"
+            variant="danger"
+            size="small"
+            onClick={handleLogout}
+          />
+        </div>
+  ) : (
+    <GoogleLoginButton
+      onSuccess={handleGoogleLogin}
+      onError={() => console.error('Error en login con Google')}
+    />
+  )
+}
 
-              {/* Imagen */}
-              <div className="cylinder mb-6 flex items-center justify-center">
-                <img
-                  src={randomFusion.image}
-                  alt={randomFusion.name}
-                  className="max-w-full h-auto object-contain rounded"
-                />
-              </div>
+{/* Fusión Aleatoria - Featured */ }
+{
+  randomFusion ? (
+    <div className="flex justify-center mt-12 mb-8">
+      <div className="cloning-machine p-8 rounded-lg shadow-2xl text-center max-w-md border-4 border-yellow-400">
+        <p className=" pokemon-font mb-4">
+          ✨ Fusión Destacada ✨
+        </p>
 
-              {/* Nombre */}
-              <h2 className="text-yellow-400 pokemon-font-small text-lg mb-2">
-                {randomFusion.name}
-              </h2>
+        {/* Imagen */}
+        <div className="cylinder mb-6 flex items-center justify-center">
+          <img
+            src={randomFusion.image}
+            alt={randomFusion.name}
+            className="max-w-full h-auto object-contain rounded"
+          />
+        </div>
 
-              {/* Info */}
-              <p className="text-green-400 text-xs font-mono mb-2">
-                {randomFusion.pokemon1.toUpperCase()} + {randomFusion.pokemon2.toUpperCase()}
-              </p>
+        {/* Nombre */}
+        <h2 className="pokemon-font-small text-lg mb-2">
+          {randomFusion.name}
+        </h2>
 
-              <p className="text-gray-400 text-xs font-mono mb-4">
-                {new Date(randomFusion.createdAt).toLocaleDateString("es-ES")}
-              </p>
+        {/* Info */}
+        <p className="text-green-400 text-xs font-mono mb-2">
+          {randomFusion.pokemon1.toUpperCase()} + {randomFusion.pokemon2.toUpperCase()}
+        </p>
 
-              {/* Botón a Galería */}
-              <Link
-                to="/gallery"
-                className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded font-bold transition"
-              >
-                🖼️ Ver más en Galería
-              </Link>
-            </div>
-          </div>
-        ) : (
-          // Si no hay fusiones
-          <div className="flex justify-center mt-12">
-            <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-yellow-400">
-              <p className="text-yellow-400 font-mono text-sm">
-                [Aún no hay fusiones... ¡Crea la primera!]
-              </p>
-            </div>
-          </div>
-        )
-      }
+        <p className="text-gray-400 text-xs font-mono mb-4">
+          {new Date(randomFusion.createdAt).toLocaleDateString("es-ES")}
+        </p>
+
+        {/* Botón a Galería */}
+        <ButtonComponent
+          text="Ver más en la galería"
+          size="small"
+          variant="secondary"
+          onClick={() => navigate("/gallery")}
+        />
+      </div>
     </div>
+  ) : (
+    // Si no hay fusiones
+    <div className="flex justify-center mt-12">
+      <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-yellow-400">
+        <p className="pokemon-font">
+          [Aún no hay fusiones... ¡Crea la primera!]
+        </p>
+      </div>
+    </div>
+  )
+}
+    </div >
   );
 }
 
