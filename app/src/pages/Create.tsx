@@ -16,6 +16,9 @@ interface PokemonData {
   types: Array<{ type: { name: string } }>;
   abilities: Array<{ ability: { name: string } }>;
   egg_groups?: Array<{ name: string }>;
+  sprites?: {
+    front_default: string;
+  };
 }
 
 interface FusionResult {
@@ -38,6 +41,7 @@ function Create() {
   const [fusionName, setFusionName] = useState("");
   const [fusionResult, setFusionResult] = useState<FusionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Uso de navigate de react para moverse
   const navigate = useNavigate();                                             // Activar navigate (react router dom)
@@ -45,12 +49,18 @@ function Create() {
 
   const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
 
+  // Verificar autenticación al cargar
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    setIsAuthenticated(!!token);
+  }, []);
+
   // Obtener el usuario logueado del localStorage
   useEffect(() => {
     const googleUser = localStorage.getItem("googleUser");
     if (googleUser) {
       try {
-        const user = JSON.parse(googleUser);
+        JSON.parse(googleUser);
         // Obtener email o name del usuario
       } catch (error) {
         console.error("Error al parsear usuario:", error);
@@ -58,50 +68,54 @@ function Create() {
     }
   }, []);
 
-  // Generar imagen con Pollinations.ai
+  // Generar imagen con Stable Diffusion vía Hugging Face API
   const generateFusionImage = async (
     poke1Data: PokemonData,
     poke2Data: PokemonData
-  ) => {
-    const prompt = `
-Create a high-quality single Pokemon fusion artwork combining ${poke1Data.name} and ${poke2Data.name}.
+  ): Promise<string> => {
+    const prompt = `A stunning Pokemon fusion artwork combining ${poke1Data.name} and ${poke2Data.name}. Blend their most distinctive features seamlessly. Professional digital art, high quality, detailed, vibrant colors, Pokemon style`;
 
-${poke1Data.name.toUpperCase()} (Type: ${poke1Data.types
-        .map((t) => t.type.name)
-        .join("/")}):
-- Height: ${(poke1Data.height * 0.1).toFixed(2)}m, Weight: ${(
-        poke1Data.weight * 0.1
-      ).toFixed(2)}kg
-- Abilities: ${poke1Data.abilities.map((a) => a.ability.name).join(", ")}
-- Characteristics: ${poke1Data.types
-        .map((t) => t.type.name)
-        .join("/")} type pokemon
+    try {
+      // Usar Hugging Face Inference API con Stable Diffusion
+      const HF_TOKEN = import.meta.env.VITE_HF_API_KEY;
+      
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+        {
+          headers: {
+            Authorization: `Bearer ${HF_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters: {
+              num_inference_steps: 50,
+              guidance_scale: 7.5,
+            },
+          }),
+        }
+      );
 
-${poke2Data.name.toUpperCase()} (Type: ${poke2Data.types
-        .map((t) => t.type.name)
-        .join("/")}):
-- Height: ${(poke2Data.height * 0.1).toFixed(2)}m, Weight: ${(
-        poke2Data.weight * 0.1
-      ).toFixed(2)}kg
-- Abilities: ${poke2Data.abilities.map((a) => a.ability.name).join(", ")}
-- Characteristics: ${poke2Data.types
-        .map((t) => t.type.name)
-        .join("/")} type pokemon
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error en HF API:", errorData);
+        
+        // Usar fallback si falla
+        return `https://via.placeholder.com/512x512/1b4db9/ffffff?text=${encodeURIComponent(
+          `${poke1Data.name} + ${poke2Data.name}`
+        )}`;
+      }
 
-Blend both Pokemon seamlessly:
-1. Combine their most distinctive features
-2. Maintain Pokemon style and proportions
-3. Use colors and patterns from both
-4. Create a realistic, detailed artwork
-5. Professional quality digital art
-6. Creating a single one Pokemon
-
-Style: Official Pokemon game art, high resolution, vibrant colors, detailed features.
-    `.trim();
-
-    const encoded = encodeURIComponent(prompt);
-    const pollApi = import.meta.env.VITE_POLLINATIONS_API;
-    return `${pollApi}/${encoded}`;
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.error("Error generando imagen con IA:", error);
+      // Fallback final
+      return `https://via.placeholder.com/512x512/1b4db9/ffffff?text=${encodeURIComponent(
+        `${poke1Data.name} + ${poke2Data.name}`
+      )}`;
+    }
   };
 
   // Click en ⚡ - Generar fusión
@@ -130,7 +144,7 @@ Style: Official Pokemon game art, high resolution, vibrant colors, detailed feat
             .toUpperCase()}`,
         pokemon1,
         pokemon2,
-        image: imageUrl,
+        image: imageUrl as string,
         createdAt: new Date().toISOString(),
       };
 
@@ -146,6 +160,12 @@ Style: Official Pokemon game art, high resolution, vibrant colors, detailed feat
 
   // Guardar en Gallery (localStorage)
   const handleSaveToGallery = () => {
+    if (!isAuthenticated) {
+      alert("⚠️ Debes iniciar sesión para guardar tu fusión");
+      navigate("/");
+      return;
+    }
+
     if (!fusionResult) {
       alert("No hay fusión para guardar");
       return;
@@ -303,6 +323,7 @@ Style: Official Pokemon game art, high resolution, vibrant colors, detailed feat
         onDownload={handleDownload}
         onShare={handleShare}
         onClose={handleCloseModal}
+        isAuthenticated={isAuthenticated}
       />
     </div >
   );

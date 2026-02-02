@@ -5,6 +5,8 @@
  */
 
 import { GoogleLogin } from '@react-oauth/google';
+import { useRef } from 'react';
+import ButtonComponent from './ButtonComponent';
 
 
 interface GoogleLoginButtonProps {
@@ -13,15 +15,31 @@ interface GoogleLoginButtonProps {
 }
 
 function GoogleLoginButton({ onSuccess, onError }: GoogleLoginButtonProps) {
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  const handleClick = () => {
+    // Clickear el botón de Google escondido
+    const googleBtn = googleButtonRef.current?.querySelector('div[role="button"]') as HTMLElement;
+    if (googleBtn) {
+      googleBtn.click();
+    }
+  };
+
   return (
-    <div className="flex justify-center mt-8">
-      <GoogleLogin
-        onSuccess={onSuccess}
-        onError={onError}
-        text="signin_with"
+    <div className="flex flex-col items-center gap-4">
+      <ButtonComponent
+        text="🔐 Inicia Sesión con Google"
+        variant="primary"
         size="large"
-        theme="filled_blue"
+        onClick={handleClick}
       />
+      {/* GoogleLogin escondido pero funcional */}
+      <div ref={googleButtonRef} className="hidden">
+        <GoogleLogin
+          onSuccess={onSuccess}
+          onError={onError}
+        />
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@
 
 import type React from "react";
 import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
 
 // Interfaz con el contenido a mostrar si está autenticado el usuario
 // y booleano de control del estado de autenticación
@@ -18,6 +19,12 @@ function ProtectedRoute({ children} : ProtectedRouteProps) {
     
      // Comprobación de si el usuario está autenticado o no
     const token = localStorage.getItem('authToken');
+
+    useEffect(() => {
+        if (!token) {
+            alert("🔐 Inicia sesión con Google para poder acceder a todo el contenido");
+        }
+    }, [token]);
 
     if (!token)
         return <Navigate to="/" replace />;

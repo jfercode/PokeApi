@@ -24,12 +24,14 @@ function App() {
           <Create />}
       />cd
 
-      {/** Ruta protegida: Protected */}
+      {/** Ruta protegida: Gallery */}
       <Route path="/gallery"
         element={
-          // <ProtectedRoute>
-            <Gallery />} />
-          {/* // </ProtectedRoute>} /> */}
+          <ProtectedRoute>
+            <Gallery />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

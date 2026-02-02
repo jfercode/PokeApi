@@ -14,6 +14,7 @@ interface FusionResultProps {
   onDownload: () => void;
   onShare: () => void;
   onClose?: () => void;
+  isAuthenticated?: boolean;
 }
 
 function FusionResult({
@@ -27,6 +28,7 @@ function FusionResult({
   onDownload,
   onShare,
   onClose,
+  isAuthenticated = false,
 
 }: FusionResultProps) {
   // Estado vacío - No mostrar nada
@@ -59,6 +61,7 @@ function FusionResult({
           onSave={onSave}
           onDownload={onDownload}
           onShare={onShare}
+          isAuthenticated={isAuthenticated}
         />
       </div>
     </div>

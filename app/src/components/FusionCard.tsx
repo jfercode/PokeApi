@@ -11,7 +11,7 @@ interface FusionCardProps {
     onShare?: () => void;
     onDelete?: () => void;
     onSave?: () => void;
-
+    isAuthenticated?: boolean;
 }
 
 function FusionCard({
@@ -24,6 +24,7 @@ function FusionCard({
     onShare,
     onDelete,
     onSave,
+    isAuthenticated = false,
 }: FusionCardProps) {
 
     return (
@@ -56,7 +57,13 @@ function FusionCard({
 
                 {/* Botones */}
                 <div className="flex gap-2 md:gap-3 flex-wrap justify-center">
-                    {onSave && (
+                    {!isAuthenticated && (
+                        <p className="text-[var(--color-primary-light)] text-xs md:text-sm mb-4 w-full">
+                            Inicia sesión para guardar, descargar o compartir tu fusión
+                        </p>
+                    )}
+
+                    {isAuthenticated && onSave && (
                         <ButtonComponent
                             text="💾 Guardar"
                             size="medium"
@@ -65,7 +72,7 @@ function FusionCard({
                         </ButtonComponent>
                     )}
 
-                    {onDownload && (
+                    {isAuthenticated && onDownload && (
                         <ButtonComponent
                             text="⬇️ Descargar"
                             size="medium"
@@ -74,7 +81,7 @@ function FusionCard({
                         </ButtonComponent>
                     )}
 
-                    {onShare && (
+                    {isAuthenticated && onShare && (
                         <ButtonComponent
                             text="📤 Compartir"
                             size="medium"
@@ -83,7 +90,7 @@ function FusionCard({
                         </ButtonComponent>
                     )}
 
-                    {onDelete && (
+                    {isAuthenticated && onDelete && (
                         <ButtonComponent
                             text="🗑️ Eliminar"
                             variant="header"

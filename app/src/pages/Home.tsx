@@ -2,12 +2,11 @@
  * Página Home
  * Primera página que ve el usuario (ruta /)
  */
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import HeaderComp from "../components/HeaderComponent";
-// import GoogleLoginButton from "../components/GoogleLoginButton";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import ButtonComponent from "../components/ButtonComponent";
 
 interface Fusion {
@@ -22,8 +21,8 @@ interface Fusion {
 function Home() {
 
   const [randomFusion, setRandomFusion] = useState<Fusion | null>(null);      // Random image here 
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);           // Autenticación
-  // const [user, setUser] = useState<any>(null);                             // Usuario autenticado
+  const [isAuthenticated, setIsAuthenticated] = useState(false);           // Autenticación
+  const [user, setUser] = useState<any>(null);                             // Usuario autenticado
   const navigate = useNavigate();                                             // Activar navigate (react router dom)
 
   // Función useEffect de generación de fusion aleatoria en el home
@@ -35,98 +34,98 @@ function Home() {
     }
   }, []);
 
-  // // Funcion de autenticación, obtiene tokens y user str y los guarda
-  // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const token = params.get('token');
-  //   const userStr = params.get('user');
+  // Funcion de autenticación, obtiene tokens y user str y los guarda
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const userStr = params.get('user');
 
-  //   if (token && userStr) {
-  //     localStorage.setItem('authToken', token);
-  //     setUser(JSON.parse(decodeURIComponent(userStr)));
-  //     setIsAuthenticated(true);
+    if (token && userStr) {
+      localStorage.setItem('authToken', token);
+      setUser(JSON.parse(decodeURIComponent(userStr)));
+      setIsAuthenticated(true);
 
-  //     window.history.replaceState({}, '', '/');
-  //   }
-  // }, []);
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
 
-  // // Recuperar sesión guardada al cargar la página (F5)
-  // useEffect(() => {
-  //   const savedToken = localStorage.getItem('authToken');
-  //   if (savedToken) {
-  //     // Aquí podrías validar el token contra el backend si lo deseas
-  //     // Por ahora, simplemente restauramos la sesión
+  // Recuperar sesión guardada al cargar la página (F5)
+  useEffect(() => {
+    const savedToken = localStorage.getItem('authToken');
+    if (savedToken) {
+      // Aquí podrías validar el token contra el backend si lo deseas
+      // Por ahora, simplemente restauramos la sesión
 
-  //     // Intentar obtener usuario desde localStorage (si fue guardado)
-  //     const savedUser = localStorage.getItem('authUser');
-  //     if (savedUser) {
-  //       try {
-  //         setUser(JSON.parse(savedUser));
-  //         setIsAuthenticated(true);
-  //         console.log('✅ Sesión restaurada:', JSON.parse(savedUser).name);
-  //       } catch (error) {
-  //         console.error('Error al restaurar sesión:', error);
-  //         localStorage.removeItem('authToken');
-  //         localStorage.removeItem('authUser');
-  //       }
-  //     } else {
-  //       setIsAuthenticated(true);
-  //       console.log('✅ Token encontrado pero sin datos de usuario');
-  //     }
-  //   }
-  // }, []);
+      // Intentar obtener usuario desde localStorage (si fue guardado)
+      const savedUser = localStorage.getItem('authUser');
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+          setIsAuthenticated(true);
+          console.log('✅ Sesión restaurada:', JSON.parse(savedUser).name);
+        } catch (error) {
+          console.error('Error al restaurar sesión:', error);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('authUser');
+        }
+      } else {
+        setIsAuthenticated(true);
+        console.log('✅ Token encontrado pero sin datos de usuario');
+      }
+    }
+  }, []);
 
-  // // Manejar login exitoso con Google
-  // const handleGoogleLogin = async (credentialResponse: any) => {
-  //   try {
-  //     // credentialResponse.credential es el JWT de Google
-  //     const googleToken = credentialResponse.credential;
+  // Manejar login exitoso con Google
+  const handleGoogleLogin = async (credentialResponse: any) => {
+    try {
+      // credentialResponse.credential es el JWT de Google
+      const googleToken = credentialResponse.credential;
 
-  //     // Enviar el token de Google al backend para validar e intercambiar por JWT nuestro
-  //     const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google-token`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ googleToken }),
-  //     });
+      // Enviar el token de Google al backend para validar e intercambiar por JWT nuestro
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ googleToken }),
+      });
 
-  //     if (!response.ok) {
-  //       throw new Error('Error al autenticar con Google');
-  //     }
+      if (!response.ok) {
+        throw new Error('Error al autenticar con Google');
+      }
 
-  //     const data = await response.json();
+      const data = await response.json();
 
-  //     // Guardar el JWT en localStorage
-  //     localStorage.setItem('authToken', data.token);
+      // Guardar el JWT en localStorage
+      localStorage.setItem('authToken', data.token);
 
-  //     // Guardar datos del usuario TAMBIÉN en localStorage
-  //     localStorage.setItem('authUser', JSON.stringify(data.user));
+      // Guardar datos del usuario TAMBIÉN en localStorage
+      localStorage.setItem('authUser', JSON.stringify(data.user));
 
 
-  //     // Notificar a App que estamos autenticados
-  //     if (setIsAuthenticated)
-  //       setIsAuthenticated(true);
+      // Notificar a App que estamos autenticados
+      if (setIsAuthenticated)
+        setIsAuthenticated(true);
 
-  //     // Guardar datos del usuario en estado
-  //     setUser(data.user);
+      // Guardar datos del usuario en estado
+      setUser(data.user);
 
-  //     alert('✅ Login exitoso', data.user.name);
-  //   }
-  //   catch (error) {
-  //     console.error('❌ Error en login:', error)
-  //     alert('Error durante la autenticación');
-  //   }
-  // };
+      alert('✅ Login exitoso', data.user.name);
+    }
+    catch (error) {
+      console.error('❌ Error en login:', error)
+      alert('Error durante la autenticación');
+    }
+  };
 
-  // // Manejar logout
-  // const handleLogout = () => {
-  //   localStorage.removeItem('authToken');
-  //   localStorage.removeItem('authUser');
-  //   setUser(null);
-  //   setIsAuthenticated(false);
-  //   console.log('✅ Sesión cerrada');
-  // };
+  // Manejar logout
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    setUser(null);
+    setIsAuthenticated(false);
+    console.log('✅ Sesión cerrada');
+  };
 
   return (
     <div
@@ -148,28 +147,37 @@ function Home() {
           onClick={() => navigate("/gallery")}
         />
       </HeaderComp>
-      {/* * Autenticación con Google
-      {isAuthenticated ? (
-        <div className="mt-8 flex flex-col items-center">
-          <p className= "pokemon-font-large mb-4">
-            👤 {user?.name}
-          </p>
-          <ButtonComponent
-            text="🚪 Logout"
-            variant="danger"
-            size="small"
-            // onClick={handleLogout}
-          />
-        </div>
-  ) : (
-    <GoogleLoginButton
-      onSuccess={handleGoogleLogin}
-      onError={() => console.error('Error en login con Google')}
-    /> 
-  )*/}
-      {/* } */}
 
       <div className="flex-1 w-full px-4 md:px-8 flex flex-col items-center justify-center">
+        {/* Sección de autenticación */}
+        {!isAuthenticated && (
+          <div className="mt-8 mb-8 flex flex-col items-center gap-4">
+            <p className="text-[var(--color-primary-light)] pokemon-font-small">
+              Inicia sesión para guardar tus fusiones
+            </p>
+            <GoogleLoginButton
+              onSuccess={handleGoogleLogin}
+              onError={() => console.error('Error en login con Google')}
+            />
+          </div>
+        )}
+
+        {isAuthenticated && (
+          <div className="mt-4 mb-8 flex flex-col items-center gap-4 text-center">
+            <p className="pokemon-font-large">
+              👤 {user?.name}
+            </p>
+            <p className="text-[var(--color-primary-light)] text-sm font-mono">
+              {user?.email}
+            </p>
+            <ButtonComponent
+              text="🚪 Logout"
+              variant="primary"
+              size="small"
+              onClick={handleLogout}
+            />
+          </div>
+        )}
         {/* Fusión Aleatoria - Featured */}
         {
           randomFusion ? (

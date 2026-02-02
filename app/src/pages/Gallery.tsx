@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import Header from "../components/Header"
+
 import FusionCard from "../components/FusionCard"
+import HeaderComp from "../components/HeaderComponent"
+import ButtonComponent from "../components/ButtonComponent"
 
 interface Fusion {
     id: string;
@@ -14,6 +16,7 @@ interface Fusion {
 
 function Gallery() {
 
+    const navigate = useNavigate();                                             // Activar navigate (react router dom)
     const [fusions, setFusions] = useState<Fusion[]>([]);
     const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
 
@@ -49,55 +52,64 @@ function Gallery() {
 
     return (
         <div
-            className="min-h-screen bg-cover bg-center p-4"
-            style={{ backgroundImage: "url(/lab-background.png)" }}
-        >
-            {/* Encabezado */}
-            <div className="monitor-screen p-8 rounded-lg shadow-2xl text-center w-full mb-8">
-                <Header titulo="Galería de arte" />
-                <p className="text-yellow-400 mb-6 text-lg font-mono pokemon-font">
-                    Fusiones creadas
-                </p>
-                {/* Botones con Links */}
-                <div className="flex gap-4 flex-wrap justify-center text-yellow-400 pokemon-font-small mt-8">
-                    <Link to="/">🏠 Home</Link>
-                    <Link to="/create">🔀 Crear Fusión</Link>
-                </div>
-            </div>
+            className="min-h-screen bg-pattern p-4 flex flex-col">
+            <HeaderComp
+                title="Galería de fusiones"
+                subtitle="Hecha un vistazo a las fusiones creadas"
+            >
+                <ButtonComponent
+                    text="🏠 Inicio"
+                    variant="header"
+                    size="small"
+                    onClick={() => navigate("/")}
+                />
+                <ButtonComponent
+                    text="🔀 Crear Fusión"
+                    variant="header"
+                    size="small"
+                    onClick={() => navigate("/create")}
+                />
+            </HeaderComp>
             {/** Contenido de la galería */}
-            {isEmpty ? (
-                // Si NO hay fusiones
-                <div className="flex justify-center mt-16">
-                    <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-yellow-400">
-                        <p className="pokemon-font font-mono text-sm">
-                            [No hay fusiones guardadas]
-                        </p>
-                        <p className="pokemon-font text-xs mt-4">
-                            <Link to="/create" className="underline hover:text-blue-300">
-                                Crea tu primera fusión →
-                            </Link>
-                        </p>
-                    </div>
-                </div>
-            ) : (
-                // Si hay fusiones - Mostrar grid con FusionCard
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                    {fusions.map((fusion) => (
-                        <div key={fusion.id} className="h-full">
-                            <FusionCard
-                                image={fusion.image}
-                                name={fusion.name}
-                                pokemon1={fusion.pokemon1}
-                                pokemon2={fusion.pokemon2}
-                                createdAt={fusion.createdAt}
-                                onDownload={() => handleDownload(fusion.image, fusion.name)}
-                                onShare={() => handleShare(fusion.image)}
-                                onDelete={() => handleDelete(fusion.id)}
-                            />
+
+            <div className="flex items-center justify-center mt-[200px]">
+                {isEmpty ? (
+                    // Si NO hay fusiones
+                    <div className="w-full flex justify-center">
+                        <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-[var(--color-primary-light)] flex flex-col items-center justify-center gap-6">
+                            <p className="pokemon-font mb-5">
+                                [Aún no hay fusiones... ¡Crea la primera!]
+                            </p>
+                            <ButtonComponent
+                                text="🔀 Crear Fusión"
+                                size="large"
+                                variant="header"
+                                onClick={() => navigate("/create")}>
+                            </ButtonComponent>
                         </div>
-                    ))}
-                </div>
-            )}
+                    </div>
+
+                ) : (
+                    // Si hay fusiones - Mostrar grid con FusionCard
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-center">
+                        {fusions.map((fusion) => (
+                            <div key={fusion.id} className="h-full">
+                                <FusionCard
+                                    fusionOwner=""
+                                    image={fusion.image}
+                                    name={fusion.name}
+                                    pokemon1={fusion.pokemon1}
+                                    pokemon2={fusion.pokemon2}
+                                    createdAt={fusion.createdAt}
+                                    onDownload={() => handleDownload(fusion.image, fusion.name)}
+                                    onShare={() => handleShare(fusion.image)}
+                                    onDelete={() => handleDelete(fusion.id)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
