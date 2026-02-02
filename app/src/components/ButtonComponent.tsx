@@ -7,7 +7,7 @@ import { useState } from "react";
 interface ButtonComponentProps {
     text: string;
     onClick?: () => void;
-    variant?: "primary" | "secondary" | "danger";
+    variant?: "header" | "primary";
     size?: "small" | "medium" | "large";
     disabled?: boolean;
 }
@@ -18,13 +18,12 @@ function ButtonComponent(props: ButtonComponentProps) {
     const [isHovered, setIsHovered] = useState(false); // Control del button hover
 
     // Clase base para todas las variantes del boton
-    const baseClasses = "font-bold uppercase transition-all duration-300 rounded cursor-pointer";
+    const baseClasses = "font-bold uppercase transition-all duration-300 rounded cursor-pointer pokemon-font-clean";
 
     // Variantes de color
     const colorClasses = {
-        primary: "bg-[var(--color-primary)] text-[var(--color-background)] border-2 border-[var(--color-secondary)] hover:bg-[var(--color-primary-dark)] hover:shadow-[0_0_15px_var(--color-primary)]",
-        secondary: "bg-[var(--color-secondary)] text-[var(--color-primary)] border-2 border-[var(--color-tertiary)] hover:bg-[var(--color-secondary-light)] hover:shadow-[0_0_20px_var(--color-tertiary)]",
-        danger: "bg-[var(--color-danger)] text-white border-2 border-[var(--color-danger-dark)] hover:bg-[var(--color-danger-dark)] hover:shadow-[0_0_20px_var(--color-danger)]"
+        header: "bg-[var(--color-primary)] transition-all hover:bg-[var(--color-primary-dark)] hover:shadow-[0_0_15px_var(--color-primary-light)] hover:-translate-y-1",
+        primary: "bg-[var(--color-primary)] transition-all hover:bg-[var(--color-primary-dark)] hover:shadow-[0_0_15px_var(--color-primary-light)] text-white",
     };
 
     // Variantes de tamaño
@@ -34,7 +33,7 @@ function ButtonComponent(props: ButtonComponentProps) {
         large: "px-7 py-3 text-lg"
     };
 
-    const variant = props.variant || "primary";
+    const variant = props.variant || "header";
     const size = props.size || "medium";
 
     // Variación final resultante de la combinación de variables 

@@ -34,6 +34,8 @@ interface PokemonDetail {
 function PokemonSelector(props: PokemonSelectorProps) {
   const [pokemons, setPokemons] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [pokemonDetail, setPokemonDetail] = useState<PokemonDetail | null>(null);
 
   // Traer lista de pokémon
@@ -117,10 +119,10 @@ function PokemonSelector(props: PokemonSelectorProps) {
     <div className="w-72">
       {/* MINI POKÉDEX */}
       {pokemonDetail ? (
-        <div className="pokedex-card bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 shadow-2xl border-4 border-yellow-400">
+        <div className="pokedex-card bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] rounded-2xl p-6 shadow-2xl border-4 border-[var(--color-primary-light)]">
           {/* Header con número */}
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-yellow-300 pokemon-font-small text-sm">
+            <h2 className="text-white pokemon-font-clean text-sm">
               {pokemonDetail.name.toUpperCase()}
             </h2>
             <span className="text-white font-bold text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
@@ -129,7 +131,7 @@ function PokemonSelector(props: PokemonSelectorProps) {
           </div>
 
           {/* Imagen en círculo */}
-          <div className="cylinder mb-6 flex items-center justify-center bg-yellow-100 rounded-full w-40 h-40 mx-auto">
+          <div className="cylinder mb-6 flex items-center justify-center bg-[var(--color-primary-dark)] rounded-full w-40 h-40 mx-auto border-4 border-[var(--color-primary-light)]">
             <img
               src={pokemonDetail.sprites.front_default}
               alt={pokemonDetail.name}
@@ -139,12 +141,12 @@ function PokemonSelector(props: PokemonSelectorProps) {
 
           {/* Tipos */}
           <div className="mb-4 text-center">
-            <p className="text-white text-xs font-bold mb-2">TIPO</p>
+            <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">TIPO</p>
             <div className="flex gap-2 justify-center flex-wrap">
               {pokemonDetail.types.map((type, idx) => (
                 <span
                   key={idx}
-                  className="bg-yellow-300 text-red-700 px-3 py-1 rounded-full text-xs font-bold"
+                  className="bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-3 py-1 rounded-full text-xs font-bold"
                 >
                   {type.type.name.toUpperCase()}
                 </span>
@@ -155,24 +157,24 @@ function PokemonSelector(props: PokemonSelectorProps) {
           {/* Stats: Altura y Peso */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="bg-black bg-opacity-30 rounded-lg p-3 text-center">
-              <p className="text-yellow-300 text-xs font-bold">ALTURA</p>
+              <p className="text-[var(--color-primary-light)] text-xs font-bold">ALTURA</p>
               <p className="text-white font-bold">{getHeight()}</p>
             </div>
             <div className="bg-black bg-opacity-30 rounded-lg p-3 text-center">
-              <p className="text-yellow-300 text-xs font-bold">PESO</p>
+              <p className="text-[var(--color-primary-light)] text-xs font-bold">PESO</p>
               <p className="text-white font-bold">{getWeight()}</p>
             </div>
           </div>
           {/* Grupos de Huevo */}
-          <div className="bg-black bg-opacity-30 rounded-lg p-3 mt-3">
-            <p className="text-yellow-300 text-xs font-bold mb-2">
+          <div className="bg-black bg-opacity-30 rounded-lg p-3 mt-3 mb-4">
+            <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">
               GRUPOS DE HUEVO
             </p>
             <div className="flex gap-2 flex-wrap">
               {getEggGroups().map((eggGroup, idx) => (
                 <span
                   key={idx}
-                  className="bg-purple-300 text-purple-900 text-xs px-2 py-1 rounded font-bold"
+                  className="bg-[var(--color-primary-light)] text-white text-xs px-2 py-1 rounded font-bold"
                 >
                   🥚 {eggGroup}
                 </span>
@@ -181,14 +183,14 @@ function PokemonSelector(props: PokemonSelectorProps) {
           </div>
           {/* Habilidades */}
           <div className="bg-black bg-opacity-30 rounded-lg p-3">
-            <p className="text-yellow-300 text-xs font-bold mb-2">
+            <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">
               HABILIDADES
             </p>
             <div className="flex gap-2 flex-wrap">
               {getAbilities().map((ability, idx) => (
                 <span
                   key={idx}
-                  className="bg-yellow-200 text-red-700 text-xs px-2 py-1 rounded font-bold"
+                  className="bg-[var(--color-primary-light)] text-white text-xs px-2 py-1 rounded font-bold"
                 >
                   {ability}
                 </span>
@@ -198,32 +200,56 @@ function PokemonSelector(props: PokemonSelectorProps) {
         </div>
       ) : (
         // Mientras no hay selección
-        <div className="pokedex-placeholder bg-gray-700 rounded-2xl p-6 shadow-2xl border-4 border-gray-500 h-96 flex items-center justify-center">
-          <p className="text-white text-center font-mono">
+        <div className="pokedex-placeholder bg-[var(--color-primary-dark)] rounded-2xl p-6 shadow-2xl border-4 border-[var(--color-primary-light)] h-96 flex items-center justify-center">
+          <p className="text-[var(--color-primary-light)] text-center font-mono">
             Selecciona un Pokémon para ver detalles
           </p>
         </div>
       )}
 
-      {/* Selector dropdown */}
+      {/* Selector búsqueda por texto */}
       <div className="mt-6">
-        <h3 className="text-green-400 text-xs mb-3 pokemon-font-small">
+        <h3 className="text-[var(--color-primary-light)] text-xs mb-3 pokemon-font-small">
           {props.label}
         </h3>
-        <select
-          value={selectedPokemon}
-          onChange={(e) => {
-            setSelectedPokemon(e.target.value);
-          }}
-          className="w-full p-3 bg-black text-green-400 border-2 border-green-500 rounded pokemon-font-small text-xs hover:border-green-300 transition"
-        >
-          <option value="">-- SELECT POKÉMON --</option>
-          {pokemons.map((pokemon: any) => (
-            <option key={pokemon.name} value={pokemon.name}>
-              {pokemon.name.toUpperCase()}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Buscar Pokémon..."
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            className="w-full p-3 bg-black text-[var(--color-primary-light)] border-2 border-[var(--color-primary-light)] rounded pokemon-font-small text-xs hover:border-[var(--color-primary)] transition focus:outline-none focus:border-[var(--color-primary)]"
+          />
+
+          {/* Sugerencias - Lista filtrada */}
+          {showSuggestions && searchText && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-black border-2 border-[var(--color-primary-light)] rounded max-h-48 overflow-y-auto z-50">
+              {pokemons
+                .filter((pokemon: any) =>
+                  pokemon.name.toUpperCase().includes(searchText.toUpperCase())
+                )
+                .slice(0, 10) // Limitar a 10 resultados
+                .map((pokemon: any) => (
+                  <div
+                    key={pokemon.name}
+                    onClick={() => {
+                      setSelectedPokemon(pokemon.name);
+                      setSearchText(pokemon.name.toUpperCase());
+                      setShowSuggestions(false);
+                    }}
+                    className="p-2 text-[var(--color-primary-light)] cursor-pointer hover:bg-[var(--color-primary-light)] hover:text-black transition pokemon-font-small text-xs"
+                  >
+                    {pokemon.name.toUpperCase()}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -4,8 +4,6 @@
  */
 
 import FusionCard from "./FusionCard";
-
-
 interface FusionResultProps {
   fusionResult: any;
   fusionName: string;
@@ -15,6 +13,7 @@ interface FusionResultProps {
   onSave: () => void;
   onDownload: () => void;
   onShare: () => void;
+  onClose?: () => void;
 }
 
 function FusionResult({
@@ -27,35 +26,42 @@ function FusionResult({
   onSave,
   onDownload,
   onShare,
+  onClose,
 
 }: FusionResultProps) {
-  // Estado vacío - Mostrar mensaje de instrucciones
+  // Estado vacío - No mostrar nada
   if (!fusionResult) {
-    return (
-      <div className="flex justify-center mt-16">
-        <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-yellow-400">
-          <p className="pokemon-font font-mono text-sm">
-            Selecciona 2 Pokémon y haz click en ⚡
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
 
-  // Resultado de la fusión - Mostrar imagen y controles
+  // Modal overlay
   return (
-    <FusionCard
-      image={fusionResult.image}
-      name={fusionName}
-      fusionOwner={fusionOwner}
-      pokemon1={pokemon1}
-      pokemon2={pokemon2}
-      createdAt={fusionResult.createAt || new Date()}
-      onSave={onSave}
-      onDownload={onDownload}
-      onShare={onShare}
-      />
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+      <div className="relative max-w-md w-full">
+        {/* Botón cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white text-2xl hover:text-gray-300 transition"
+          aria-label="Cerrar"
+        >
+          ✕
+        </button>
+        
+        {/* Card content */}
+        <FusionCard
+          image={fusionResult.image}
+          name={fusionName}
+          fusionOwner={fusionOwner}
+          pokemon1={pokemon1}
+          pokemon2={pokemon2}
+          createdAt={fusionResult.createAt || new Date()}
+          onSave={onSave}
+          onDownload={onDownload}
+          onShare={onShare}
+        />
+      </div>
+    </div>
   );
 }
 

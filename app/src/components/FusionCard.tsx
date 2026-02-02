@@ -1,6 +1,6 @@
+import ButtonComponent from "./ButtonComponent";
 
-interface FusionCardProps
-{
+interface FusionCardProps {
     image: string;
     name: string;
     fusionOwner: string;
@@ -27,11 +27,11 @@ function FusionCard({
 }: FusionCardProps) {
 
     return (
-        <div className="flex justify-center mt-16 mb-12">
-            <div className="cloning-machine p-8 rounded-lg shadow-2xl text-center max-w-md border-4 border-yellow-400">
+        <div className="w-full px-4 md:px-8 flex flex-col items-center justify-center">
+            <div className="bg-[var(--color-primary-dark)] p-6 md:p-8 rounded-lg shadow-2xl text-center w-full md:w-auto md:max-w-md border-4 border-[var(--color-primary-light)]">
 
                 {/* Imagen */}
-                <div className="cylinder mb-6 flex items-center justify-center">
+                <div className="cylinder mb-6 flex items-center justify-center border-[var(--color-primary-light)] border-2 rounded-md">
                     <img
                         src={image}
                         alt={name}
@@ -40,60 +40,56 @@ function FusionCard({
                 </div>
 
                 {/* Nombre */}
-                <h2 className="text-yellow-400 pokemon-font-small text-lg mb-4">
+                <h2 className="text-[var(--color-primary-light)] pokemon-font font-bold text-lg md:text-xl mb-4">
                     {name}
                 </h2>
 
                 {/* Pokémon combinados */}
-                <p className="text-green-400 text-xs font-mono mb-4">
+                <p className="text-[var(--color-primary)] text-xs md:text-sm font-mono mb-4">
                     {pokemon1.toUpperCase()} + {pokemon2.toUpperCase()}
                 </p>
 
                 {/* Fecha */}
-                <p className="text-gray-400 text-xs font-mono mb-6">
+                <p className="text-gray-400 text-xs md:text-sm font-mono mb-6">
                     {new Date(createdAt).toLocaleString("es-ES")}
                 </p>
 
                 {/* Botones */}
-                <div className="flex gap-3 flex-wrap justify-center">
+                <div className="flex gap-2 md:gap-3 flex-wrap justify-center">
                     {onSave && (
-                        <button
-                            onClick={onSave}
-                            aria-label="Guardar esta fusión en mi galería"
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold transition text-sm"
-                        >
-                            💾 Guardar
-                        </button>
+                        <ButtonComponent
+                            text="💾 Guardar"
+                            size="medium"
+                            variant="header"
+                            onClick={onSave}>
+                        </ButtonComponent>
                     )}
 
                     {onDownload && (
-                        <button
-                            onClick={onDownload}
-                            aria-label="Descargar imagen de la fusión en PNG"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-bold transition text-sm"
-                        >
-                            ⬇️ Descargar
-                        </button>
+                        <ButtonComponent
+                            text="⬇️ Descargar"
+                            size="medium"
+                            variant="header"
+                            onClick={onDownload}>
+                        </ButtonComponent>
                     )}
 
                     {onShare && (
-                        <button
-                            onClick={onShare}
-                            aria-label="Compartir esta fusión con tus amigos"
-                            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-bold transition text-sm"
-                        >
-                            📤 Compartir
-                        </button>
+                        <ButtonComponent
+                            text="📤 Compartir"
+                            size="medium"
+                            variant="header"
+                            onClick={onShare}>
+                        </ButtonComponent>
                     )}
 
                     {onDelete && (
-                        <button
-                            onClick={onDelete}
-                            aria-label="Eliminar esta fusión de la galería"
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold transition text-sm"
-                        >
-                            🗑️ Eliminar
-                        </button>
+                        <ButtonComponent
+                            text="🗑️ Eliminar"
+                            variant="header"
+                            size="medium"
+                            onClick={onDelete}>
+                        </ButtonComponent>
                     )}
                 </div>
             </div>

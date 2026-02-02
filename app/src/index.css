@@ -7,30 +7,26 @@
 @tailwind utilities;
 
 :root {
-  /* PALETA NEON RETRO - Pokémon Moderno */
-  --color-primary: #FFD700;           /* Amarillo neón */
-  --color-primary-dark: #FFC700;
-  --color-primary-light: #FFED4E;
-  
-  --color-secondary: #6B21A8;         /* Púrpura */
-  --color-secondary-dark: #581C87;
-  --color-secondary-light: #7C3AED;
-  
-  --color-tertiary: #06B6D4;          /* Cian */
-  --color-tertiary-dark: #0891B2;
-  --color-tertiary-light: #22D3EE;
-  
-  --color-contrast: #ADFF2F;          /* Verde lima */
-  --color-background: #0F172A;        /* Gris oscuro */
-  --color-font: #FFFFFF;              /* Blanco puro */
-  --color-font-secondary: #94A3B8;    /* Gris claro */
-  
-  --color-danger: #EF5350;            /* Rojo logout */
-  --color-danger-dark: #C62828;
-  
-  --color-success: #10B981;           /* Verde éxito */
-}
+  --bg-color: rgb(19, 21, 21);
 
+  --color-primary-light: rgba(86, 255, 235, 0.8);
+  --color-primary: rgba(27, 206, 185, 0.8);
+  --color-primary-dark: rgba(20, 109, 99, 0.8);
+
+  --font-color-white: rgba(255, 255, 255, 255);
+  --font-color-black: rgba(0, 0, 0, 255);
+  --font-color-gray: #767676;
+
+  --font-color-primary-light: rgba(86, 255, 235, 0.8);
+  --font-color-primary: rgba(27, 206, 185, 0.8);
+  --font-color-primary-dark: rgba(20, 109, 99, 0.8);
+
+  --gradient: linear-gradient(
+    135deg,
+    rgba(27, 206, 185, 0.8),
+    rgba(20, 109, 99, 0.8)
+  );
+}
 body {
   margin: 0;
   padding: 0;
@@ -40,6 +36,15 @@ body {
   background-color: var(--color-background);
   color: var(--color-font);
 }
+
+.bg-pattern {
+    background-color: var(--bg-color);
+    background-image: url("/app/public/bg-test.png");
+    background-size: 5px 5px;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-position: center;
+  }
 
 /* ============================================================
                     FUENTES Y TIPOGRAFÍA
@@ -74,7 +79,7 @@ body {
   font-size: 0.875rem;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--color-primary);
+  color: var(--color-primary-light);
   -webkit-text-stroke: 0.05px var(--color-secondary);
   text-shadow: 2px 2px 0 var(--color-secondary),
                -1px -1px 0 var(--color-secondary),
@@ -96,6 +101,7 @@ body {
 
 .pokemon-font-clean {
   font-family: "Press Start 2P", monospace;
+  color: white;
   font-size: 0.875rem;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -105,62 +111,10 @@ body {
                     COMPONENTES DE INTERFAZ
    ============================================================ */
 
-.monitor-screen {
-  background: var(--color-background);
-  border: 10px solid var(--color-contrast);
-  border-radius: 12px;
-  box-shadow: 
-    inset 0 0 20px rgba(173, 255, 47, 0.3),
-    0 0 30px rgba(0, 0, 0, 0.8);
-}
-
-.cloning-machine {
-  background: linear-gradient(135deg, var(--color-tertiary-dark) 0%, var(--color-secondary-dark) 100%);
-  border: 6px solid var(--color-secondary);
-  border-radius: 20px;
-  padding: 1.5rem 1rem;
-  box-shadow: 
-    inset 0 0 20px rgba(107, 33, 168, 0.3),
-    0 0 30px rgba(15, 23, 42, 0.5);
-  position: relative;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.cylinder {
-  width: 120px;
-  height: 140px;
-  background: radial-gradient(
-    ellipse at 30% 30%,
-    rgba(100, 200, 255, 0.4),
-    transparent
-  );
-  border: 3px solid var(--color-tertiary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  box-shadow: 
-    inset 0 0 15px rgba(6, 182, 212, 0.5),
-    0 0 15px rgba(6, 182, 212, 0.3);
-}
 
 .pokemon-image {
   width: 100px;
   height: 100px;
   object-fit: contain;
-  filter: drop-shadow(0 0 5px rgba(100, 200, 255, 0.6));
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
+  filter: drop-shadow(0 0 5px var(--color-primary-dark));
 }
