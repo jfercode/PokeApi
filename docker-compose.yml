@@ -37,7 +37,7 @@ services:
       - "3000:3000"
     # Variables de entorno desde .env
     env_file:
-      - .env
+      - ./app/.env
     # Mantener el contenedor en ejecución
     tty: true
     stdin_open: true

@@ -61,7 +61,7 @@ endef
 help: ascii
 	@echo "$(BLUE)Comandos disponibles:$(RESET)\n"
 	@echo "$(CYAN)CONFIGURACIÓN DEL PROYECTO:$(RESET)"
-	@echo "$(GREEN)make check-env$(RESET)		- Verificar configuración de .env"
+	@echo "$(GREEN)make check-env$(RESET)		- Verificar configuración de /app/.env"
 	@echo "$(GREEN)make init$(RESET)			- Inicializar proyecto Vite + Tailwind (primera vez)"
 	@echo "$(GREEN)make dev$(RESET)			 - Iniciar servidor de desarrollo (frontend + backend)"
 	@echo "$(GREEN)make clean-app$(RESET)	   - Limpiar carpeta app para reiniciar"
@@ -89,13 +89,13 @@ help: ascii
 
 ####### VERIFICACIÓN DE ENTORNO #######
 
-# Verificar si existe el archivo .env y tiene las variables requeridas
+# Verificar si existe el archivo /app/.env y tiene las variables requeridas
 check-env:
-	@if [ ! -f ".env" ]; then \
+	@if [ ! -f "./app/.env" ]; then \
 		echo "$(RED)✖ Archivo .env no encontrado!$(RESET)"; \
 		echo ""; \
 		echo "$(YELLOW)Por favor crea un archivo .env basándote en .env.example$(RESET)"; \
-		echo "$(CYAN)Ejecuta: cp .env.example .env$(RESET)"; \
+		echo "$(CYAN)Ejecuta: cp .env.example /app/.env$(RESET)"; \
 		echo ""; \
 		echo "$(RED)⚠ IMPORTANTE: Configura todas las variables antes de continuar$(RESET)"; \
 		exit 1; \
@@ -231,7 +231,7 @@ status: ascii
 	@docker network ls
 	@echo ""
 	@echo "$(BLUE)=== ENTORNO ===$(RESET)"
-	@if [ -f ".env" ]; then \
+	@if [ -f "./app/.env" ]; then \
 		echo "$(GREEN)✔ Archivo .env existe$(RESET)"; \
 		if grep -q "CHANGE_THIS" .env 2>/dev/null; then \
 			echo "$(YELLOW)⚠ Algunas variables pueden necesitar configuración$(RESET)"; \
@@ -251,7 +251,7 @@ health: ascii
 	@echo "$(CYAN)Backend (3000):$(RESET)"
 	@curl -s http://localhost:3000/health > /dev/null && echo "$(GREEN)✔ Respondiendo$(RESET)" || echo "$(RED)✖ No responde$(RESET)"
 	@echo ""
-	@if [ -f ".env" ]; then \
+	@if [ -f "./app/.env" ]; then \
 		echo "$(CYAN)Entorno:$(RESET)"; \
 		if grep -q "CHANGE_THIS" .env 2>/dev/null; then \
 			echo "$(YELLOW)⚠ Algunas credenciales necesitan ser configuradas$(RESET)"; \

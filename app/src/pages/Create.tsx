@@ -1,5 +1,5 @@
 /**
- * Página Create - Panel de Fusión Completo
+ * Page Create - Complete Fusion Panel
  */
 
 import HeaderComp from "../components/HeaderComponent";
@@ -31,158 +31,141 @@ interface FusionResult {
 }
 
 function Create() {
-  // Estados de Pokémon
+  // Pokemon states
   const [pokemon1, setPokemon1] = useState("");
   const [pokemon2, setPokemon2] = useState("");
   const [pokemon1Data, setPokemon1Data] = useState<PokemonData | null>(null);
   const [pokemon2Data, setPokemon2Data] = useState<PokemonData | null>(null);
 
-  // Estados de la fusión
+  // Fusion states
   const [fusionName, setFusionName] = useState("");
   const [fusionResult, setFusionResult] = useState<FusionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Uso de navigate de react para moverse
-  const navigate = useNavigate();                                             // Activar navigate (react router dom)
-
+  // Use navigate from react router dom
+  const navigate = useNavigate();
 
   const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
 
-  // Verificar autenticación al cargar
+  // Check authentication on load
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     setIsAuthenticated(!!token);
   }, []);
 
-  // Obtener el usuario logueado del localStorage
+  // Get logged in user from localStorage
   useEffect(() => {
     const googleUser = localStorage.getItem("googleUser");
     if (googleUser) {
       try {
         JSON.parse(googleUser);
-        // Obtener email o name del usuario
+        // Get email or name from user
       } catch (error) {
-        console.error("Error al parsear usuario:", error);
+        console.error("Error parsing user:", error);
       }
     }
   }, []);
 
-  // Generar imagen con Stable Diffusion vía Hugging Face API
-  const generateFusionImage = async (
-    poke1Data: PokemonData,
-    poke2Data: PokemonData
-  ): Promise<string> => {
-    const prompt = `A stunning Pokemon fusion artwork combining ${poke1Data.name} and ${poke2Data.name}. Blend their most distinctive features seamlessly. Professional digital art, high quality, detailed, vibrant colors, Pokemon style`;
-
+  // Call the api to create the fusion image
+  const callGenerateFusion = async (pokemon1Data: PokemonData, pokemon2Data: PokemonData) => {
     try {
-      // Usar Hugging Face Inference API con Stable Diffusion
-      const HF_TOKEN = import.meta.env.VITE_HF_API_KEY;
-      
-      const response = await fetch(
-        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
-        {
-          headers: {
-            Authorization: `Bearer ${HF_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters: {
-              num_inference_steps: 50,
-              guidance_scale: 7.5,
-            },
-          }),
-        }
-      );
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error en HF API:", errorData);
-        
-        // Usar fallback si falla
-        return `https://via.placeholder.com/512x512/1b4db9/ffffff?text=${encodeURIComponent(
-          `${poke1Data.name} + ${poke2Data.name}`
-        )}`;
-      }
+      // Extract only necessary data (not sprites or large objects)
+      const pokemon1Minimal = {
+        name: pokemon1Data.name,
+        types: pokemon1Data.types,
+        abilities: pokemon1Data.abilities,
+      };
 
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
+      const pokemon2Minimal = {
+        name: pokemon2Data.name,
+        types: pokemon2Data.types,
+        abilities: pokemon2Data.abilities,
+      };
+
+      const response = await fetch(`${backendUrl}/api/generate-fusion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pokemon1Data: pokemon1Minimal,
+          pokemon2Data: pokemon2Minimal,
+        }),
+      });
+
+      if (!response.ok) throw new Error(`Backend error: ${response.statusText}`);
+
+      const data = await response.json();
+
+      return data;
     } catch (error) {
-      console.error("Error generando imagen con IA:", error);
-      // Fallback final
-      return `https://via.placeholder.com/512x512/1b4db9/ffffff?text=${encodeURIComponent(
-        `${poke1Data.name} + ${poke2Data.name}`
-      )}`;
+      console.error('Error calling generate fusion: ', error);
+      throw error;
     }
   };
 
-  // Click en ⚡ - Generar fusión
   const handleFusion = async () => {
     if (!pokemon1 || !pokemon2 || !pokemon1Data || !pokemon2Data) {
-      alert("Por favor selecciona 2 Pokémon");
+      alert("Please select 2 Pokemon");
       return;
     }
 
     if (pokemon1 === pokemon2) {
-      alert("Por favor selecciona 2 Pokémon diferentes");
+      alert("Please select 2 different Pokemon");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const imageUrl = await generateFusionImage(pokemon1Data, pokemon2Data);
+      const result = await callGenerateFusion(pokemon1Data, pokemon2Data);
 
-      const fusion: FusionResult = {
+      const fusionResult: FusionResult = {
         id: Date.now().toString(),
-        name:
-          fusionName ||
-          `${pokemon1.charAt(0).toUpperCase()}${pokemon2
-            .charAt(0)
-            .toUpperCase()}`,
-        pokemon1,
-        pokemon2,
-        image: imageUrl as string,
+        name: `${pokemon1} & ${pokemon2}`,
+        pokemon1: pokemon1,
+        pokemon2: pokemon2,
+        image: result.imageUrl,
         createdAt: new Date().toISOString(),
       };
 
-      setFusionResult(fusion);
-      setFusionName(fusion.name);
+      setFusionResult(fusionResult);
     } catch (error) {
-      console.error("Error generando fusión:", error);
-      alert("❌ Error al generar la fusión");
+      console.error("Error generating fusion:", error);
+      alert("❌ Error generating fusion");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Guardar en Gallery (localStorage)
+  // Save to Gallery (localStorage)
   const handleSaveToGallery = () => {
     if (!isAuthenticated) {
-      alert("⚠️ Debes iniciar sesión para guardar tu fusión");
+      alert("⚠️ You must login to save your fusion");
       navigate("/");
       return;
     }
 
     if (!fusionResult) {
-      alert("No hay fusión para guardar");
+      alert("No fusion to save");
       return;
     }
 
     if (!fusionName.trim()) {
-      alert("Por favor nombra tu fusión");
+      alert("Please name your fusion");
       return;
     }
 
     const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
 
-    // Verificar si ya existe una fusión con ese ID
+    // Check if fusion already exists
     const alreadyExists = saved.some((f: FusionResult) => f.id === fusionResult.id);
 
     if (alreadyExists) {
-      alert("⚠️ Esta fusión ya está guardada en la galería");
+      alert("⚠️ This fusion is already saved in the gallery");
       return;
     }
 
@@ -194,9 +177,9 @@ function Create() {
     saved.push(fusionToSave);
     localStorage.setItem(storageKey, JSON.stringify(saved));
 
-    alert(`✅ ¡Fusión "${fusionName}" guardada en la galería!`);
+    alert(`✅ Fusion "${fusionName}" saved to gallery!`);
 
-    // Limpiar formulario
+    // Clean form
     setFusionResult(null);
     setFusionName("");
     setPokemon1("");
@@ -205,7 +188,7 @@ function Create() {
     setPokemon2Data(null);
   };
 
-  // Descargar imagen
+  // Download image
   const handleDownload = () => {
     if (fusionResult) {
       const link = document.createElement("a");
@@ -215,21 +198,21 @@ function Create() {
     }
   };
 
-  // Compartir - Copia texto descriptivo
+  // Share - Copy descriptive text
   const handleShare = () => {
     if (fusionResult) {
       navigator.clipboard.writeText(fusionResult.image);
-      alert("📋 Fusión copiada al portapapeles!");
+      alert("📋 Fusion copied to clipboard!");
     }
   };
 
-  // Cerrar modal de fusión
+  // Close fusion modal
   const handleCloseModal = () => {
     setFusionResult(null);
     setFusionName("");
   };
 
-  // Callbacks para los selectores
+  // Callbacks for selectors
   const handlePokemon1Select = useCallback(
     (name: string, img: string, data: PokemonData) => {
       setPokemon1(name);
@@ -247,35 +230,33 @@ function Create() {
   );
 
   return (
-    <div
-      className="min-h-screen bg-pattern p-4 flex flex-col"
-    >
-      {/* Encabezado */}
+    <div className="min-h-screen bg-pattern p-4 flex flex-col">
+      {/* Header */}
       <HeaderComp
-        title="Panel de Fusión"
-        subtitle="Selecciona dos Pokémon para fusionar"
+        title="Fusion Panel"
+        subtitle="Select two Pokemon to fuse"
       >
         <ButtonComponent
-          text="🏠 Inicio"
+          text="🏠 Home"
           variant="header"
           size="small"
           onClick={() => navigate("/")}
         />
         <ButtonComponent
-          text="🖼️ Galería"
+          text="🖼️ Gallery"
           variant="header"
           size="small"
           onClick={() => navigate("/gallery")}
         />
       </HeaderComp>
 
-      {/* Selectores y botón de fusión */}
+      {/* Selectors and fusion button */}
       <div className="flex-1 flex flex-col items-center justify-center mt-40">
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-5 w-full max-w-xs px-4">
-          {/* Selector 1 - Pokémon 1 */}
+          {/* Selector 1 - Pokemon 1 */}
           <div className="w-full md:flex-1 shrink max-w-xs">
             <label className="block text-[var(--color-primary-light)] pokemon-font mb-2 text-center md:text-base">
-              Pokémon 1
+              Pokemon 1
             </label>
             <PokemonSelector
               label=""
@@ -283,7 +264,7 @@ function Create() {
             />
           </div>
 
-          {/* Botón de fusión con animación */}
+          {/* Fusion button with animation */}
           <button
             onClick={handleFusion}
             disabled={isLoading || !pokemon1 || !pokemon2}
@@ -294,15 +275,15 @@ function Create() {
               ? "bg-gray-600 text-gray-300 cursor-not-allowed"
               : "bg-[var(--color-primary-light)] hover:bg-[var(--color-primary)] text-black cursor-pointer"
               }`}
-            aria-label="Generar fusión Pokémon"
+            aria-label="Generate Pokemon fusion"
           >
             {isLoading ? "⏳" : "⚡"}
           </button>
 
-          {/* Selector 2 - Pokémon 2 */}
+          {/* Selector 2 - Pokemon 2 */}
           <div className="w-full md:flex-1 shrink max-w-xs">
             <label className="block text-[var(--color-primary-light)] pokemon-font mb-2 text-center text-base">
-              Pokémon 2
+              Pokemon 2
             </label>
             <PokemonSelector
               label=""
@@ -312,7 +293,7 @@ function Create() {
         </div>
       </div>
 
-      {/* Panel de resultado con FusionPanel - Modal */}
+      {/* Result panel with FusionPanel - Modal */}
       <FusionPanel
         fusionResult={fusionResult}
         fusionName={fusionName}
@@ -325,40 +306,8 @@ function Create() {
         onClose={handleCloseModal}
         isAuthenticated={isAuthenticated}
       />
-    </div >
+    </div>
   );
 }
 
 export default Create;
-
-/**
- * CREATE.TSX (REFACTORIZADO)
- * ═══════════════════════════════════════════════════════════════
- *
- * QUÉ ES:
- * Create.tsx es la página de fusión de Pokémon (/create).
- * Aquí el usuario selecciona 2 Pokémon y los fusiona.
- * ESTRUCTURA:
- * 1. INTERFACES: PokemonData, FusionResult
- * 2. ESTADOS: pokemon1/2, fusionResult, etc
- * 3. EFFECTS: Obtener usuario logueado
- * 4. FUNCIONES: handleFusion, handleSave, handleDownload, handleShare
- * 5. RENDER: Selectores, botón, FusionPanel
- *
- * FLUJO:
- * 1. Usuario navega a /create
- * 2. Se obtiene el email del usuario logueado
- * 3. Ve dos selectores lado a lado
- * 4. Selecciona Pokémon 1 → Se trae su data
- * 5. Selecciona Pokémon 2 → Se trae su data
- * 6. Hace click en ⚡ → Se genera imagen con Pollinations.ai
- * 7. Aparece FusionPanel con FusionCard mostrando resultado
- * 8. Usuario nombra la fusión
- * 9. Click en 💾 Guardar → Se guarda en localStorage
- * 10. Se navega a Gallery (no automático, pero puede hacer clic en enlace)
- *
- * COMPONENTES REUTILIZADOS:
- * - Header: Muestra el título
- * - PokemonSelector: Trae lista y detalles de PokeAPI
- * - FusionPanel: Muestra el resultado (que usa FusionCard)
- */

@@ -1,34 +1,34 @@
 /** 
- *  Configuración inicial 
+ *  Initial configuration 
  */
-require('dotenv').config();             //  Lectura de variables de entorno
-const express = require('express');     //  Importa express
-const cors = require('cors');           //  Permite la comunicación con el frontend
+require('dotenv').config();             //  Load environment variables
+const express = require('express');     //  Import express
+const cors = require('cors');           //  Enable communication with frontend
 
-const { googleAuthURL, googleAuthCallback, googleTokenValidation, logout, authMiddleware } = require('./auth.js');    // Importar funciones de autenticación
+const { googleAuthURL, googleAuthCallback, googleTokenValidation, logout, authMiddleware } = require('./auth.js');    // Import authentication functions
+const { generateFusionImage } = require('./generateFusion');  // Import fusion generation function
 
 /**
- *  Creación de la app y configuración del puerto
+ *  App creation and port configuration
  */
-const app = express();                  //  Crea App
-const PORT = process.env.PORT;          //  Configura puerto desde la variables de entorno
+const app = express();                  //  Create App
+const PORT = process.env.PORT;          //  Configure port from environment variables
 
 /**
  * Middlewares
  */
-app.use(cors());                    // Habilita CORS
-app.use(express.json());            // El servidor entiende JSON en las peticiones
+app.use(cors());                    // Enable CORS
+app.use(express.json());            // Server understands JSON in requests
 
 /**
  * Health check endpoint
  */
-// Verificacion del estado del Backend (al acceder a /health)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend is running' });
 });
 
 /**
- * Ruta principal (/)
+ * Main route (/)
  */
 app.get('/', (req, res) => {
   res.json({ 
@@ -42,17 +42,39 @@ app.get('/', (req, res) => {
 });
 
 /**
- * Rutas de Autenticación (SIN protección)
+ * Authentication routes (NO protection)
  */
-app.get('/api/auth/google', googleAuthURL);         // Inicia login con Google
-app.get('/api/auth/callback', googleAuthCallback);  // Google redirige aqui con el código
-app.post('/api/auth/google-token', googleTokenValidation);  // Validar token de Google desde frontend
-app.get('/api/auth/logout', logout);                // Cierre de sesión
+app.get('/api/auth/google', googleAuthURL);         // Start login with Google
+app.get('/api/auth/callback', googleAuthCallback);  // Google redirects here with code
+app.post('/api/auth/google-token', googleTokenValidation);  // Validate Google token from frontend
+app.get('/api/auth/logout', logout);                // Session logout
 
 /**
- * Proteger todas las demás rutas /api con JWT
+ * Image generation endpoint (PUBLIC - NO authentication required)
  */
-app.use('/api', authMiddleware);    // Proteger todas las rutas que empiezan con /api DESPUÉS de auth
+app.post('/api/generate-fusion', async (req, res) => {
+  try {
+    const { pokemon1Data, pokemon2Data } = req.body;
+    
+    // Validate required data
+    if (!pokemon1Data || !pokemon2Data) {
+      return res.status(400).json({ error: 'Missing pokemon data' });
+    }
+    
+    // Generate fusion image
+    const result = await generateFusionImage(pokemon1Data, pokemon2Data);
+    
+    // Return result
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Protect all other /api routes with JWT
+ */
+app.use('/api', authMiddleware);    // Protect all routes that start with /api AFTER auth
 
 /**
  * Api routes placeholder 
@@ -61,7 +83,7 @@ app.get('/api', (req, res) => {
   res.json({ message: 'API routes coming soon' });
 });
 
-// Obtención de perfil de usuario autentificado
+// Get authenticated user profile
 app.get('/api/user/profile', authMiddleware, (req, res) => {
   res.json({
     message: 'User profile',
@@ -69,39 +91,38 @@ app.get('/api/user/profile', authMiddleware, (req, res) => {
   })
 });
 
-// Fusiones del usuario obtenidas de la db (a implementar)
+// Get user fusions from database (to implement)
 app.get('/api/user/fusions', authMiddleware, (req, res) =>{
   res.json({
     message: 'User fusions',
     user: req.user.id,
-    fusions: [] // Fusiones de la db 
+    fusions: [] // Fusions from database
   })
 });
 
 /**
- *  CRUD ENDPOINTS - Gestión de datos de las Fusiones
+ *  CRUD ENDPOINTS - Fusion data management
  */
-// GET - Obtencion de todas las fusiones del usuario autenticado // TODO Obtener de la db
+// GET - Get all fusions from authenticated user
 app.get('/api/fusions', authMiddleware, (req, res) =>{
   const userId = req.user.id;
 
   res.json({
     message: 'User fusions',
     userId: userId,
-    fusion: []  // cambiar esta linea
+    fusion: []  // Change this line
   })
 });
 
-// POST - Crear una nueva fusión 
+// POST - Create a new fusion
 app.post('/api/fusions', authMiddleware, (req, res) => {
   
   const userId = req.user.id;
   const {name, pokemon1, pokemon2, image} = req.body;
 
   if (!name || !pokemon1 || !pokemon2 || !image)
-      return res.status(400).json({ error:' Missing required fields' });
+      return res.status(400).json({ error: 'Missing required fields' });
 
-  // TODO guardar en la DB aqui
   const fusion = {
     id: Date.now().toString(),
     userId: userId,
@@ -109,26 +130,25 @@ app.post('/api/fusions', authMiddleware, (req, res) => {
     pokemon1,
     pokemon2,
     image, 
-    createAt: new Date().toISOString()
+    createdAt: new Date().toISOString()
   };
   res.status(201).json({
-    message: 'Fusion created succssfully',
+    message: 'Fusion created successfully',
     fusion
   });
 });
 
-// DELETE - Eliminar una fusion existente
+// DELETE - Delete an existing fusion
 app.delete('/api/fusions/:id', authMiddleware, (req, res) => {
 
   const fusionId = req.params.id;
   const userId = req.user.id;
-  // TODO Validar que la fusión pertenece al usuario y eliminar de la DB
+  
   res.json({
-    message: 'Fussion deleted successfully',
+    message: 'Fusion deleted successfully',
     fusionId: fusionId
   });
 });
-
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
