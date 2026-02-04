@@ -16,12 +16,6 @@
   <img src="./image.png" alt="PokeAPI Preview" width="500" height="auto" style="border: 3px solid #1BCEBD; border-radius: 8px;">
 </div>
 
-**Personalización de tamaño:**
-- Reemplaza `width="600"` por:
-  - `width="400"` para móvil
-  - `width="800"` para pantalla completa
-  - `height="auto"` mantiene proporción automáticamente
-
 ---
 
 ## 🎯 Acerca del Proyecto
@@ -57,7 +51,6 @@ Antes de comenzar, asegúrate de tener:
 - **Claves API**:
   - Credenciales de Google OAuth 2.0
   - Clave API de Stability AI (para generación de imágenes)
-  - Clave API de Google Generative AI (opcional, para características avanzadas)
 
 ### Instalación y Configuración
 
@@ -92,7 +85,6 @@ OAUTH_CLIENT_ID=tu_google_client_id_aqui
 OAUTH_CLIENT_SECRET=tu_google_client_secret_aqui
 JWT_SECRET=tu_jwt_secret_seguro_aqui
 STABILITY_API_KEY=tu_stability_ai_key_aqui
-GOOGLE_GENERATIVE_AI_KEY=tu_google_ai_key_aqui
 ```
 
 #### 3. Iniciar la Aplicación
