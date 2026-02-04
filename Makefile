@@ -18,7 +18,7 @@ RESET  = \033[0m
 
 all: up
 
-####### ARTE ASCII #######
+####### ASCII ART #######
 ascii:
 	@clear
 	@echo "$(CYAN)"
@@ -28,7 +28,7 @@ ascii:
 	@echo "╚════════════════════════════════════════╝"
 	@echo "$(RESET)"
 
-####### SISTEMA DE CARGA #######
+####### LOADING SYSTEM #######
 define pretty_do
 	@\
 	printf "$(YELLOW)[···]$(RESET) $(1) ...\n"; \
@@ -52,71 +52,81 @@ define pretty_do
 	if [ $$RESULT -eq 0 ]; then \
 		printf "\r\033[K$(GREEN)[✔] $(1)$(RESET)\n"; \
 	else \
-		printf "\r\033[K$(RED)[✖] $(1)$(RESET) (Código de salida $$RESULT)\n"; \
+		printf "\r\033[K$(RED)[✖] $(1)$(RESET) (Exit code $$RESULT)\n"; \
 		exit $$RESULT; \
 	fi
 endef
 
-####### AYUDA #######
+####### HELP #######
 help: ascii
-	@echo "$(BLUE)Comandos disponibles:$(RESET)\n"
-	@echo "$(CYAN)CONFIGURACIÓN DEL PROYECTO:$(RESET)"
-	@echo "$(GREEN)make check-env$(RESET)		- Verificar configuración de /app/.env"
-	@echo "$(GREEN)make init$(RESET)			- Inicializar proyecto Vite + Tailwind (primera vez)"
-	@echo "$(GREEN)make dev$(RESET)			 - Iniciar servidor de desarrollo (frontend + backend)"
-	@echo "$(GREEN)make clean-app$(RESET)	   - Limpiar carpeta app para reiniciar"
+	@echo "$(BLUE)Available commands:$(RESET)\n"
+	@echo "$(CYAN)PROJECT SETUP:$(RESET)"
+	@echo "$(GREEN)make check-env$(RESET)		- Check full configuration and show warnings"
+	@echo "$(GREEN)make init$(RESET)			- Initialize Vite + Tailwind project (first time)"
+	@echo "$(GREEN)make dev$(RESET)			 - Start development servers (frontend + backend)"
+	@echo "$(GREEN)make clean-app$(RESET)	   - Clean app folder to restart"
 	@echo ""
-	@echo "$(CYAN)GESTIÓN DE DOCKER:$(RESET)"
-	@echo "$(GREEN)make up$(RESET)			  - Iniciar todos los contenedores"
-	@echo "$(GREEN)make down$(RESET)			- Detener todos los contenedores"
-	@echo "$(GREEN)make logs$(RESET)			- Ver logs en tiempo real"
-	@echo "$(GREEN)make logs-frontend$(RESET)	- Ver logs solo del frontend"
-	@echo "$(GREEN)make logs-backend$(RESET)	 - Ver logs solo del backend"
-	@echo "$(GREEN)make ps$(RESET)			  - Mostrar procesos activos"
-	@echo "$(GREEN)make stop$(RESET)			- Pausar contenedores (sin eliminar)"
-	@echo "$(GREEN)make re$(RESET)			  - Reiniciar todo (fclean + up)"
-	@echo "$(GREEN)make fclean$(RESET)		  - Limpiar volúmenes y sistema"
-	@echo "$(GREEN)make remove$(RESET)		  - Eliminar imágenes y redes"
-	@echo "$(GREEN)make build$(RESET)		   - Construir imágenes sin caché"
+	@echo "$(CYAN)DOCKER MANAGEMENT:$(RESET)"
+	@echo "$(GREEN)make up$(RESET)			  - Start all containers"
+	@echo "$(GREEN)make down$(RESET)			- Stop all containers"
+	@echo "$(GREEN)make logs$(RESET)			- View real-time logs"
+	@echo "$(GREEN)make logs-frontend$(RESET)	- View frontend logs only"
+	@echo "$(GREEN)make logs-backend$(RESET)	 - View backend logs only"
+	@echo "$(GREEN)make ps$(RESET)			  - Show active processes"
+	@echo "$(GREEN)make stop$(RESET)			- Pause containers (without removing)"
+	@echo "$(GREEN)make re$(RESET)			  - Restart everything (fclean + up)"
+	@echo "$(GREEN)make fclean$(RESET)		  - Clean volumes and system"
+	@echo "$(GREEN)make remove$(RESET)		  - Remove images and networks"
+	@echo "$(GREEN)make build$(RESET)		   - Build images without cache"
 	@echo ""
-	@echo "$(CYAN)UTILIDADES:$(RESET)"
-	@echo "$(GREEN)make shell-frontend$(RESET)  - Acceder al shell del contenedor frontend"
-	@echo "$(GREEN)make shell-backend$(RESET)	- Acceder al shell del contenedor backend"
-	@echo "$(GREEN)make status$(RESET)		  - Mostrar contenedores, volúmenes, redes"
-	@echo "$(GREEN)make resources$(RESET)	   - Ver uso de recursos de Docker"
-	@echo "$(GREEN)make health$(RESET)		  - Verificar salud de los servicios"
+	@echo "$(CYAN)UTILITIES:$(RESET)"
+	@echo "$(GREEN)make shell-frontend$(RESET)  - Access frontend container shell"
+	@echo "$(GREEN)make shell-backend$(RESET)	- Access backend container shell"
+	@echo "$(GREEN)make status$(RESET)		  - Show containers, volumes, networks"
+	@echo "$(GREEN)make resources$(RESET)	   - View Docker resource usage"
+	@echo "$(GREEN)make health$(RESET)		  - Check services health"
 	@echo ""
 
-####### VERIFICACIÓN DE ENTORNO #######
+####### ENVIRONMENT VERIFICATION #######
 
-# Verificar si existe el archivo /app/.env y tiene las variables requeridas
-check-env:
+# Silent check: only verifies that .env exists
+_check-env-silent:
 	@if [ ! -f "./app/.env" ]; then \
-		echo "$(RED)✖ Archivo .env no encontrado!$(RESET)"; \
+		echo "$(RED)✖ .env file not found!$(RESET)"; \
 		echo ""; \
-		echo "$(YELLOW)Por favor crea un archivo .env basándote en .env.example$(RESET)"; \
-		echo "$(CYAN)Ejecuta: cp .env.example /app/.env y cp .env.example /backend/.env y quedate con la parte que necesitas para cada uno de los contenedores$(RESET)"; \
-		echo ""; \
-		echo "$(RED)⚠ IMPORTANTE: Configura todas las variables antes de continuar$(RESET)"; \
+		echo "$(YELLOW)Please create a .env file based on .env.example$(RESET)"; \
+		echo "$(CYAN)Run: cp .env.example /app/.env and cp .env.example /backend/.env$(RESET)"; \
 		exit 1; \
 	fi
-	@echo "$(GREEN)✔ Archivo .env existe$(RESET)"
+
+# Full check with warnings: validates configuration
+check-env: ascii
+	@if [ ! -f "./app/.env" ]; then \
+		echo "$(RED)✖ .env file not found!$(RESET)"; \
+		echo ""; \
+		echo "$(YELLOW)Please create a .env file based on .env.example$(RESET)"; \
+		echo "$(CYAN)Run: cp .env.example /app/.env and cp .env.example /backend/.env$(RESET)"; \
+		echo ""; \
+		echo "$(RED)⚠ IMPORTANT: Configure all variables before continuing$(RESET)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✔ .env file exists$(RESET)"
 	@if ! grep -q "OAUTH_CLIENT_ID" .env || ! grep -q "OAUTH_CLIENT_SECRET" .env; then \
-		echo "$(YELLOW)⚠ Advertencia: Las credenciales OAuth pueden no estar configuradas$(RESET)"; \
-		echo "$(YELLOW)Por favor edita .env y agrega tus credenciales OAuth2$(RESET)"; \
+		echo "$(YELLOW)⚠ Warning: OAuth credentials may not be configured$(RESET)"; \
+		echo "$(YELLOW)Please edit .env and add your OAuth2 credentials$(RESET)"; \
 	fi
 	@if ! grep -q "JWT_SECRET" .env || grep -q "CHANGE_THIS_SECRET" .env; then \
-		echo "$(YELLOW)⚠ Advertencia: JWT_SECRET no configurado o usando valor por defecto$(RESET)"; \
-		echo "$(YELLOW)Por favor edita .env y establece un JWT_SECRET seguro$(RESET)"; \
+		echo "$(YELLOW)⚠ Warning: JWT_SECRET not configured or using default value$(RESET)"; \
+		echo "$(YELLOW)Please edit .env and set a secure JWT_SECRET$(RESET)"; \
 	fi
 	@if ! grep -q "IMAGE_API_KEY" .env; then \
-		echo "$(YELLOW)⚠ Advertencia: IMAGE_API_KEY no configurado$(RESET)"; \
-		echo "$(YELLOW)Por favor edita .env y agrega tu API key de generación de imágenes$(RESET)"; \
+		echo "$(YELLOW)⚠ Warning: IMAGE_API_KEY not configured$(RESET)"; \
+		echo "$(YELLOW)Please edit .env and add your image generation API key$(RESET)"; \
 	fi
 
-####### CONFIGURACIÓN DEL PROYECTO #######
+####### PROJECT SETUP #######
 
-# Comando de inicialización del proyecto frontend
+# Frontend project initialization command
 CMD_INIT := set -e; \
 	cd /tmp; \
 	npm create vite@latest temp-project -- --template react-ts; \
@@ -138,58 +148,58 @@ CMD_INIT := set -e; \
 	fi
 
 
-# Limpiar solo archivos de configuración de la carpeta app
+# Clean only configuration files from the app folder
 clean-app: ascii
-	$(call pretty_do,Limpiando configuración del frontend,rm -rf app/node_modules app/package-lock.json app/package.json app/vite.config.ts app/tsconfig*.json app/postcss.config.js app/tailwind.config.js 2>/dev/null || true)
-	$(call pretty_do,Limpiando configuración del backend,rm -rf backend/node_modules backend/package-lock.json 2>/dev/null || true)
-	@echo "$(GREEN)✔ Archivos de configuración limpiados. Tu código fuente está seguro.$(RESET)"
+	$(call pretty_do,Cleaning frontend configuration,rm -rf app/node_modules app/package-lock.json app/package.json app/vite.config.ts app/tsconfig*.json app/postcss.config.js app/tailwind.config.js 2>/dev/null || true)
+	$(call pretty_do,Cleaning backend configuration,rm -rf backend/node_modules backend/package-lock.json 2>/dev/null || true)
+	@echo "$(GREEN)✔ Configuration files cleaned. Your source code is safe.$(RESET)"
 
-# Inicializar proyecto Vite con Tailwind CSS (Typescript + React) + Backend
+# Initialize Vite project with Tailwind CSS (Typescript + React) + Backend
 init: ascii check-env
 	@if [ -f "app/package.json" ]; then \
-		echo "$(YELLOW)⚠ Frontend ya inicializado. Usa 'make clean-app' primero si quieres reinicializar.$(RESET)"; \
+		echo "$(YELLOW)⚠ Frontend already initialized. Use 'make clean-app' first if you want to reinitialize.$(RESET)"; \
 		exit 1; \
 	fi
-	$(call pretty_do,Construyendo imágenes de Docker,$(COMPOSE) -f $(COMPOSE_FILE) build)
-	$(call pretty_do,Configurando proyecto frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c '$(CMD_INIT)')
-	$(call pretty_do,Instalando Google OAuth2 en frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c 'npm install @react-oauth/google')
-	$(call pretty_do,Instalando dependencias del backend (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20 axios google-auth-library')
-	@echo "$(GREEN)✔ Proyecto inicializado exitosamente!$(RESET)"
+	$(call pretty_do,Building Docker images,$(COMPOSE) -f $(COMPOSE_FILE) build)
+	$(call pretty_do,Setting up frontend project,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c '$(CMD_INIT)')
+	$(call pretty_do,Installing Google OAuth2 on frontend,$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T frontend sh -c 'npm install @react-oauth/google')
+	$(call pretty_do,Installing backend dependencies (Express + OAuth2 + JWT),$(COMPOSE) -f $(COMPOSE_FILE) run --rm -T backend sh -c 'npm install && npm install jsonwebtoken passport passport-google-oauth20 axios google-auth-library')
+	@echo "$(GREEN)✔ Project initialized successfully!$(RESET)"
 
-# Iniciar servidor de desarrollo
-dev: ascii check-env
+# Start development servers
+dev: ascii _check-env-silent
 	@if [ ! -f "app/package.json" ]; then \
-		echo "$(RED)✖ Frontend no inicializado. Ejecuta 'make init' primero.$(RESET)"; \
+		echo "$(RED)✖ Frontend not initialized. Run 'make init' first.$(RESET)"; \
 		exit 1; \
 	fi
-	$(call pretty_do,Iniciando servidores de desarrollo,$(COMPOSE) -f $(COMPOSE_FILE) up -d)
-	@echo "$(GREEN)✨ Servidores de desarrollo listos!$(RESET)"
+	$(call pretty_do,Starting development servers,$(COMPOSE) -f $(COMPOSE_FILE) up -d)
+	@echo "$(GREEN)✨ Development servers ready!$(RESET)"
 	@echo "  🎨 Frontend:  $(CYAN)http://localhost:5173$(RESET)"
 	@echo "  🔧 Backend:   $(CYAN)http://localhost:3000$(RESET)"
 	@echo ""
-	@echo "$(YELLOW)Consejo:$(RESET) Usa $(GREEN)make logs$(RESET) para ver la salida en vivo"
-	@echo "$(YELLOW)Consejo:$(RESET) Usa $(GREEN)make health$(RESET) para verificar los servicios"
+	@echo "$(YELLOW)Tip:$(RESET) Use $(GREEN)make logs$(RESET) to see live output"
+	@echo "$(YELLOW)Tip:$(RESET) Use $(GREEN)make health$(RESET) to check services"
 
-####### UTILIDADES DEL MAKEFILE #######
+####### MAKEFILE UTILITIES #######
 
-up: ascii check-env
-	$(call pretty_do,Iniciando contenedores,$(COMPOSE) -f $(COMPOSE_FILE) up --build -d)
-	@echo "$(GREEN)✨ PokeAPI Full Stack está listo:$(RESET)"
+up: ascii _check-env-silent
+	$(call pretty_do,Starting containers,$(COMPOSE) -f $(COMPOSE_FILE) up --build -d)
+	@echo "$(GREEN)✨ PokeAPI Full Stack is ready:$(RESET)"
 	@echo "  🎨 Frontend:  $(CYAN)http://localhost:5173$(RESET)"
 	@echo "  🔧 Backend:   $(CYAN)http://localhost:3000$(RESET)"
 
 down: ascii
-	$(call pretty_do,Deteniendo contenedores,$(COMPOSE) -f $(COMPOSE_FILE) down)
+	$(call pretty_do,Stopping containers,$(COMPOSE) -f $(COMPOSE_FILE) down)
 
 fclean: down
-	$(call pretty_do,Limpiando volúmenes y sistema,$(COMPOSE) -f $(COMPOSE_FILE) down --volumes --remove-orphans && docker volume prune -f && docker system prune -af)
+	$(call pretty_do,Cleaning volumes and system,$(COMPOSE) -f $(COMPOSE_FILE) down --volumes --remove-orphans && docker volume prune -f && docker system prune -af)
 
 remove: fclean
-	$(call pretty_do,Eliminando imágenes y redes,docker network prune -f && docker rmi $$(docker images -aq) 2>/dev/null || true)
+	$(call pretty_do,Removing images and networks,docker network prune -f && docker rmi $$(docker images -aq) 2>/dev/null || true)
 
 re: fclean up
 
-####### UTILIDADES DE DOCKER #######
+####### DOCKER UTILITIES #######
 
 logs: ascii
 	@$(COMPOSE) -f $(COMPOSE_FILE) logs -f
@@ -201,13 +211,13 @@ logs-backend: ascii
 	@$(COMPOSE) -f $(COMPOSE_FILE) logs -f backend
 
 stop: ascii
-	$(call pretty_do,Pausando contenedores,$(COMPOSE) -f $(COMPOSE_FILE) stop)
+	$(call pretty_do,Pausing containers,$(COMPOSE) -f $(COMPOSE_FILE) stop)
 
 ps: ascii
 	@docker ps
 
 build: ascii
-	$(call pretty_do,Construyendo imágenes,$(COMPOSE) -f $(COMPOSE_FILE) build --no-cache)
+	$(call pretty_do,Building images,$(COMPOSE) -f $(COMPOSE_FILE) build --no-cache)
 
 shell-frontend:
 	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend /bin/sh
@@ -215,52 +225,60 @@ shell-frontend:
 shell-backend:
 	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend /bin/sh
 
-# Retrocompatibilidad
+# Backwards compatibility
 shell: shell-frontend
 
-####### UTILIDADES DE DESARROLLO #######
+####### DEVELOPMENT UTILITIES #######
 
 status: ascii
-	@echo "$(BLUE)=== CONTENEDORES ===$(RESET)"
+	@echo "$(BLUE)=== CONTAINERS ===$(RESET)"
 	@docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 	@echo ""
-	@echo "$(BLUE)=== VOLÚMENES ===$(RESET)"
+	@echo "$(BLUE)=== VOLUMES ===$(RESET)"
 	@docker volume ls
 	@echo ""
-	@echo "$(BLUE)=== REDES ===$(RESET)"
+	@echo "$(BLUE)=== NETWORKS ===$(RESET)"
 	@docker network ls
 	@echo ""
-	@echo "$(BLUE)=== ENTORNO ===$(RESET)"
+	@echo "$(BLUE)=== ENVIRONMENT ===$(RESET)"
 	@if [ -f "./app/.env" ]; then \
-		echo "$(GREEN)✔ Archivo .env existe$(RESET)"; \
-		if grep -q "CHANGE_THIS" .env 2>/dev/null; then \
-			echo "$(YELLOW)⚠ Algunas variables pueden necesitar configuración$(RESET)"; \
+		echo "$(GREEN)✔ Frontend .env exists$(RESET)"; \
+		if grep -q "CHANGE_THIS" ./app/.env 2>/dev/null; then \
+			echo "$(YELLOW)⚠ Frontend: Some variables may need configuration$(RESET)"; \
 		fi; \
 	else \
-		echo "$(RED)✖ Archivo .env falta$(RESET)"; \
+		echo "$(RED)✖ Frontend .env missing$(RESET)"; \
+	fi
+	@if [ -f "./backend/.env" ]; then \
+		echo "$(GREEN)✔ Backend .env exists$(RESET)"; \
+		if grep -q "CHANGE_THIS" ./backend/.env 2>/dev/null; then \
+			echo "$(YELLOW)⚠ Backend: Some variables may need configuration$(RESET)"; \
+		fi; \
+	else \
+		echo "$(RED)✖ Backend .env missing$(RESET)"; \
 	fi
 
 resources:
 	@docker stats --no-stream
 
 health: ascii
-	@echo "$(BLUE)Verificando servicios...$(RESET)\n"
+	@echo "$(BLUE)Checking services...$(RESET)\n"
 	@echo "$(CYAN)Frontend (5173):$(RESET)"
-	@curl -s http://localhost:5173 > /dev/null && echo "$(GREEN)✔ Respondiendo$(RESET)" || echo "$(RED)✖ No responde$(RESET)"
+	@curl -s http://localhost:5173 > /dev/null && echo "$(GREEN)✔ Responding$(RESET)" || echo "$(RED)✖ Not responding$(RESET)"
 	@echo ""
 	@echo "$(CYAN)Backend (3000):$(RESET)"
-	@curl -s http://localhost:3000/health > /dev/null && echo "$(GREEN)✔ Respondiendo$(RESET)" || echo "$(RED)✖ No responde$(RESET)"
+	@curl -s http://localhost:3000/health > /dev/null && echo "$(GREEN)✔ Responding$(RESET)" || echo "$(RED)✖ Not responding$(RESET)"
 	@echo ""
 	@if [ -f "./app/.env" ]; then \
-		echo "$(CYAN)Entorno:$(RESET)"; \
+		echo "$(CYAN)Environment:$(RESET)"; \
 		if grep -q "CHANGE_THIS" .env 2>/dev/null; then \
-			echo "$(YELLOW)⚠ Algunas credenciales necesitan ser configuradas$(RESET)"; \
+			echo "$(YELLOW)⚠ Some credentials need to be configured$(RESET)"; \
 		else \
-			echo "$(GREEN)✔ Entorno configurado$(RESET)"; \
+			echo "$(GREEN)✔ Environment configured$(RESET)"; \
 		fi; \
 	fi
 
-####### ALIAS ÚTILES #######
+####### USEFUL ALIASES #######
 restart: down up
 test: health
 info: status

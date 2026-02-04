@@ -161,7 +161,7 @@ function Create() {
     saved.push(fusionToSave);
     localStorage.setItem(storageKey, JSON.stringify(saved));
 
-    alert(`✅ Fusion "${fusionName}" saved to gallery!`);
+    alert(`✅ Fusion saved to gallery!`);
 
     // Clear form
     setFusionResult(null);
