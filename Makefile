@@ -95,7 +95,7 @@ check-env:
 		echo "$(RED)✖ Archivo .env no encontrado!$(RESET)"; \
 		echo ""; \
 		echo "$(YELLOW)Por favor crea un archivo .env basándote en .env.example$(RESET)"; \
-		echo "$(CYAN)Ejecuta: cp .env.example /app/.env$(RESET)"; \
+		echo "$(CYAN)Ejecuta: cp .env.example /app/.env y cp .env.example /backend/.env y quedate con la parte que necesitas para cada uno de los contenedores$(RESET)"; \
 		echo ""; \
 		echo "$(RED)⚠ IMPORTANTE: Configura todas las variables antes de continuar$(RESET)"; \
 		exit 1; \

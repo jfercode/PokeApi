@@ -5,6 +5,7 @@ import FusionCard from "../components/FusionCard"
 import HeaderComp from "../components/HeaderComponent"
 import ButtonComponent from "../components/ButtonComponent"
 
+// Interface for saved fusion data
 interface Fusion {
     id: string;
     name: string;
@@ -14,26 +15,29 @@ interface Fusion {
     createdAt: string;
 }
 
+// Gallery page component - displays all saved Pokemon fusions
+// Allows users to view, download, share, and delete their fusions
 function Gallery() {
 
-    const navigate = useNavigate();                                             // Activar navigate (react router dom)
+    const navigate = useNavigate();
     const [fusions, setFusions] = useState<Fusion[]>([]);
     const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
 
-    // Obtención de fusiones guardadas en localStorage 
+    // Load saved fusions from localStorage on component mount
     useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem(storageKey) || "[]"); setFusions(saved);
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        setFusions(saved);
     }, []);
 
-    // Eliminación de fusiones (localStorage)
+    // Delete a fusion from gallery
     const handleDelete = (id: string) => {
         const updated = fusions.filter(fusion => fusion.id !== id)
         setFusions(updated);
         localStorage.setItem(storageKey, JSON.stringify(updated));
-        alert("❌ Fusión " + id + " eliminada");
+        alert("❌ Fusion deleted");
     }
 
-    // Descargar la fusion (.png)
+    // Download fusion image as PNG
     const handleDownload = (image: string, name: string) => {
         const link = document.createElement("a");
         link.href = image;
@@ -41,47 +45,47 @@ function Gallery() {
         link.click();
     };
 
-    // Función para compartir ("URL")
+    // Copy fusion image URL to clipboard
     const handleShare = (image: string) => {
         navigator.clipboard.writeText(image);
-        alert("📋 URL copiada al portapapeles!");
+        alert("📋 URL copied to clipboard!");
     };
 
-    // Verificación previa de fusiones
+    // Check if gallery is empty
     const isEmpty = fusions.length === 0;
 
     return (
         <div
             className="min-h-screen bg-pattern p-4 flex flex-col">
             <HeaderComp
-                title="Galería de fusiones"
-                subtitle="Hecha un vistazo a las fusiones creadas"
+                title="Fusion Gallery"
+                subtitle="Take a look at your created fusions"
             >
                 <ButtonComponent
-                    text="🏠 Inicio"
+                    text="🏠 Home"
                     variant="header"
                     size="small"
                     onClick={() => navigate("/")}
                 />
                 <ButtonComponent
-                    text="🔀 Crear Fusión"
+                    text="🔀 Create Fusion"
                     variant="header"
                     size="small"
                     onClick={() => navigate("/create")}
                 />
             </HeaderComp>
-            {/** Contenido de la galería */}
 
+            {/* Gallery content */}
             <div className="flex items-center justify-center mt-[200px]">
                 {isEmpty ? (
-                    // Si NO hay fusiones
+                    // Empty gallery message
                     <div className="w-full flex justify-center">
                         <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-[var(--color-primary-light)] flex flex-col items-center justify-center gap-6">
                             <p className="pokemon-font mb-5">
-                                [Aún no hay fusiones... ¡Crea la primera!]
+                                [No fusions yet... Create the first one!]
                             </p>
                             <ButtonComponent
-                                text="🔀 Crear Fusión"
+                                text="🔀 Create Fusion"
                                 size="large"
                                 variant="header"
                                 onClick={() => navigate("/create")}>
@@ -90,7 +94,7 @@ function Gallery() {
                     </div>
 
                 ) : (
-                    // Si hay fusiones - Mostrar grid con FusionCard
+                    // Fusions grid
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-center">
                         {fusions.map((fusion) => (
                             <div key={fusion.id} className="h-full">
@@ -104,6 +108,7 @@ function Gallery() {
                                     onDownload={() => handleDownload(fusion.image, fusion.name)}
                                     onShare={() => handleShare(fusion.image)}
                                     onDelete={() => handleDelete(fusion.id)}
+                                    isAuthenticated={true}
                                 />
                             </div>
                         ))}

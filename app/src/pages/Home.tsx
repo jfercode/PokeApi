@@ -1,7 +1,3 @@
-/**
- * Página Home
- * Primera página que ve el usuario (ruta /)
- */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +5,7 @@ import HeaderComp from "../components/HeaderComponent";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import ButtonComponent from "../components/ButtonComponent";
 
+// Interface for Fusion data structure
 interface Fusion {
   id?: string;
   name: string;
@@ -18,23 +15,26 @@ interface Fusion {
   createdAt: string;
 }
 
+// Home page component - landing page with authentication and featured fusion
+// Displays login button, user info, and showcases a random fusion from gallery
 function Home() {
 
-  const [randomFusion, setRandomFusion] = useState<Fusion | null>(null);      // Random image here 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);           // Autenticación
-  const [user, setUser] = useState<any>(null);                             // Usuario autenticado
-  const navigate = useNavigate();                                             // Activar navigate (react router dom)
+  const [randomFusion, setRandomFusion] = useState<Fusion | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
 
-  // Función useEffect de generación de fusion aleatoria en el home
+  // Load random fusion from saved gallery
   useEffect(() => {
     const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
-    const saved = JSON.parse(localStorage.getItem(storageKey) || "[]"); if (saved.length > 0) {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    if (saved.length > 0) {
       const random = saved[Math.floor(Math.random() * saved.length)];
       setRandomFusion(random);
     }
   }, []);
 
-  // Funcion de autenticación, obtiene tokens y user str y los guarda
+  // Handle OAuth redirect parameters from backend
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
@@ -49,39 +49,34 @@ function Home() {
     }
   }, []);
 
-  // Recuperar sesión guardada al cargar la página (F5)
+  // Restore authentication session on page load
   useEffect(() => {
     const savedToken = localStorage.getItem('authToken');
     if (savedToken) {
-      // Aquí podrías validar el token contra el backend si lo deseas
-      // Por ahora, simplemente restauramos la sesión
-
-      // Intentar obtener usuario desde localStorage (si fue guardado)
       const savedUser = localStorage.getItem('authUser');
       if (savedUser) {
         try {
           setUser(JSON.parse(savedUser));
           setIsAuthenticated(true);
-          console.log('✅ Sesión restaurada:', JSON.parse(savedUser).name);
+          console.log('✅ Session restored:', JSON.parse(savedUser).name);
         } catch (error) {
-          console.error('Error al restaurar sesión:', error);
+          console.error('Error restoring session:', error);
           localStorage.removeItem('authToken');
           localStorage.removeItem('authUser');
         }
       } else {
         setIsAuthenticated(true);
-        console.log('✅ Token encontrado pero sin datos de usuario');
+        console.log('✅ Token found without user data');
       }
     }
   }, []);
 
-  // Manejar login exitoso con Google
+  // Handle successful Google login
   const handleGoogleLogin = async (credentialResponse: any) => {
     try {
-      // credentialResponse.credential es el JWT de Google
       const googleToken = credentialResponse.credential;
 
-      // Enviar el token de Google al backend para validar e intercambiar por JWT nuestro
+      // Send Google token to backend for validation and JWT exchange
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google-token`, {
         method: 'POST',
         headers: {
@@ -91,57 +86,51 @@ function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Error al autenticar con Google');
+        throw new Error('Error authenticating with Google');
       }
 
       const data = await response.json();
 
-      // Guardar el JWT en localStorage
+      // Save JWT and user data to localStorage
       localStorage.setItem('authToken', data.token);
-
-      // Guardar datos del usuario TAMBIÉN en localStorage
       localStorage.setItem('authUser', JSON.stringify(data.user));
 
-
-      // Notificar a App que estamos autenticados
-      if (setIsAuthenticated)
-        setIsAuthenticated(true);
-
-      // Guardar datos del usuario en estado
+      // Update authentication state
+      setIsAuthenticated(true);
       setUser(data.user);
 
-      alert('✅ Login exitoso', data.user.name);
+      alert('✅ Login successful for ' + data.user.name);
     }
     catch (error) {
-      console.error('❌ Error en login:', error)
-      alert('Error durante la autenticación');
+      console.error('❌ Login error:', error)
+      alert('Error during authentication');
     }
   };
 
-  // Manejar logout
+  // Handle user logout
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
     setUser(null);
     setIsAuthenticated(false);
-    console.log('✅ Sesión cerrada');
+    console.log('✅ Session closed');
   };
 
   return (
     <div
       className="min-h-screen bg-pattern p-4 flex flex-col">
       <HeaderComp
-        title="Poké_Creator"
-        subtitle="Crea tu propia Fusión Pokémon usando IA"
+        title="PokeApi"
+        subtitle="Create your own Pokemon Fusion using AI"
       >
         <ButtonComponent
-          text="🔀 Crear Fusión"
+          text="🔀 Create Fusion"
           variant="header"
           size="small"
           onClick={() => navigate("/create")}
         />
         <ButtonComponent
-          text="🖼️ Galería"
+          text="🖼️ Gallery"
           variant="header"
           size="small"
           onClick={() => navigate("/gallery")}
@@ -149,15 +138,15 @@ function Home() {
       </HeaderComp>
 
       <div className="flex-1 w-full px-4 md:px-8 flex flex-col items-center justify-center">
-        {/* Sección de autenticación */}
+        {/* Authentication section */}
         {!isAuthenticated && (
           <div className="mt-8 mb-8 flex flex-col items-center gap-4">
             <p className="text-[var(--color-primary-light)] pokemon-font-small">
-              Inicia sesión para guardar tus fusiones
+              Sign in to save your fusions
             </p>
             <GoogleLoginButton
               onSuccess={handleGoogleLogin}
-              onError={() => console.error('Error en login con Google')}
+              onError={() => console.error('Error logging in with Google')}
             />
           </div>
         )}
@@ -178,16 +167,16 @@ function Home() {
             />
           </div>
         )}
-        {/* Fusión Aleatoria - Featured */}
+        {/* Featured random fusion */}
         {
           randomFusion ? (
             <div className="w-full flex justify-center">
               <div className="p-6 md:p-8 rounded-lg shadow-2xl shadow-[var(--color-primary-light)] text-center w-full max-w-md border-4 border-[var(--color-primary-light)] bg-[var(--color-primary-dark)]">
                 <p className="pokemon-font font-extrabold mb-4 flex justify-center">
-                  ✨ Fusión Destacada ✨
+                  ✨ Featured Fusion ✨
                 </p>
 
-                {/* Imagen */}
+                {/* Fusion image */}
                 <div className="cylinder mb-6 flex items-center justify-center border-[var(--color-primary-light)] border-2 rounded-md">
                   <img
                     src={randomFusion.image}
@@ -196,23 +185,23 @@ function Home() {
                   />
                 </div>
 
-                {/* Nombre */}
+                {/* Fusion name */}
                 <h2 className="pokemon-font-small text-lg md:text-xl mb-2">
                   {randomFusion.name}
                 </h2>
 
-                {/* Info */}
+                {/* Fusion info */}
                 <p className="pokemon-font-clean text-xs md:text-sm font-mono mb-2">
                   {randomFusion.pokemon1.toUpperCase()} + {randomFusion.pokemon2.toUpperCase()}
                 </p>
 
                 <p className="text-gray-400 text-xs md:text-sm font-mono mb-4">
-                  {new Date(randomFusion.createdAt).toLocaleDateString("es-ES")}
+                  {new Date(randomFusion.createdAt).toLocaleDateString("en-US")}
                 </p>
 
-                {/* Botón a Galería */}
+                {/* Button to gallery */}
                 <ButtonComponent
-                  text="Ver más en la galería"
+                  text="View more in gallery"
                   size="small"
                   variant="header"
                   onClick={() => navigate("/gallery")}
@@ -220,14 +209,14 @@ function Home() {
               </div>
             </div>
           ) : (
-            // Si no hay fusiones
+            // No fusions message
             <div className="w-full flex justify-center">
               <div className="monitor-screen p-8 rounded-lg text-center w-full max-w-md border-4 border-[var(--color-primary-light)] flex flex-col items-center justify-center gap-6">
                 <p className="pokemon-font mb-5">
-                  [Aún no hay fusiones... ¡Crea la primera!]
+                  [No fusions yet... Create the first one!]
                 </p>
                 <ButtonComponent
-                    text="🔀 Crear Fusión"
+                    text="🔀 Create Fusion"
                     size="large"
                     variant="header"
                     onClick={() => navigate("/create")}>

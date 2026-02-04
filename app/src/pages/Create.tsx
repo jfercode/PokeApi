@@ -1,7 +1,3 @@
-/**
- * Page Create - Complete Fusion Panel
- */
-
 import HeaderComp from "../components/HeaderComponent";
 import { useState, useCallback, useEffect } from "react";
 import PokemonSelector from "../components/PokemonSelector";
@@ -9,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import FusionPanel from "../components/FusionPanel";
 import ButtonComponent from "../components/ButtonComponent";
 
+// Interface for Pokemon data from PokeAPI
 interface PokemonData {
   name: string;
   height: number;
@@ -21,6 +18,7 @@ interface PokemonData {
   };
 }
 
+// Interface for fusion result data
 interface FusionResult {
   id: string;
   name: string;
@@ -30,49 +28,36 @@ interface FusionResult {
   createdAt: string;
 }
 
+// Create page component - fusion generation interface
+// Allows users to select two Pokemon and generate an AI-based fusion image
 function Create() {
-  // Pokemon states
+  // Pokemon selection states
   const [pokemon1, setPokemon1] = useState("");
   const [pokemon2, setPokemon2] = useState("");
   const [pokemon1Data, setPokemon1Data] = useState<PokemonData | null>(null);
   const [pokemon2Data, setPokemon2Data] = useState<PokemonData | null>(null);
 
-  // Fusion states
+  // Fusion generation states
   const [fusionName, setFusionName] = useState("");
   const [fusionResult, setFusionResult] = useState<FusionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Use navigate from react router dom
   const navigate = useNavigate();
-
   const storageKey = import.meta.env.VITE_STORAGE_KEY_FUSIONS;
 
-  // Check authentication on load
+  // Check authentication status on component mount
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     setIsAuthenticated(!!token);
   }, []);
 
-  // Get logged in user from localStorage
-  useEffect(() => {
-    const googleUser = localStorage.getItem("googleUser");
-    if (googleUser) {
-      try {
-        JSON.parse(googleUser);
-        // Get email or name from user
-      } catch (error) {
-        console.error("Error parsing user:", error);
-      }
-    }
-  }, []);
-
-  // Call the api to create the fusion image
+  // Call backend API to generate fusion image
   const callGenerateFusion = async (pokemon1Data: PokemonData, pokemon2Data: PokemonData) => {
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-      // Extract only necessary data (not sprites or large objects)
+      // Extract minimal required data (excluding large objects like sprites)
       const pokemon1Minimal = {
         name: pokemon1Data.name,
         types: pokemon1Data.types,
@@ -92,13 +77,16 @@ function Create() {
         },
         body: JSON.stringify({
           pokemon1Data: pokemon1Minimal,
-          pokemon2Data: pokemon2Minimal,
+          pokemon2Data: pokemon2Minimal
         }),
       });
 
       if (!response.ok) throw new Error(`Backend error: ${response.statusText}`);
 
       const data = await response.json();
+
+      console.log('Backend response: ', data);
+      console.log('Image URL: ', data.imageUrl);
 
       return data;
     } catch (error) {
@@ -107,6 +95,7 @@ function Create() {
     }
   };
 
+  // Handle fusion generation
   const handleFusion = async () => {
     if (!pokemon1 || !pokemon2 || !pokemon1Data || !pokemon2Data) {
       alert("Please select 2 Pokemon");
@@ -141,7 +130,7 @@ function Create() {
     }
   };
 
-  // Save to Gallery (localStorage)
+  // Save fusion to gallery (localStorage)
   const handleSaveToGallery = () => {
     if (!isAuthenticated) {
       alert("⚠️ You must login to save your fusion");
@@ -151,11 +140,6 @@ function Create() {
 
     if (!fusionResult) {
       alert("No fusion to save");
-      return;
-    }
-
-    if (!fusionName.trim()) {
-      alert("Please name your fusion");
       return;
     }
 
@@ -179,7 +163,7 @@ function Create() {
 
     alert(`✅ Fusion "${fusionName}" saved to gallery!`);
 
-    // Clean form
+    // Clear form
     setFusionResult(null);
     setFusionName("");
     setPokemon1("");
@@ -188,7 +172,7 @@ function Create() {
     setPokemon2Data(null);
   };
 
-  // Download image
+  // Download fusion image as PNG
   const handleDownload = () => {
     if (fusionResult) {
       const link = document.createElement("a");
@@ -198,7 +182,7 @@ function Create() {
     }
   };
 
-  // Share - Copy descriptive text
+  // Share fusion image URL
   const handleShare = () => {
     if (fusionResult) {
       navigator.clipboard.writeText(fusionResult.image);
@@ -212,7 +196,7 @@ function Create() {
     setFusionName("");
   };
 
-  // Callbacks for selectors
+  // Callback for Pokemon 1 selection
   const handlePokemon1Select = useCallback(
     (name: string, img: string, data: PokemonData) => {
       setPokemon1(name);
@@ -221,6 +205,7 @@ function Create() {
     []
   );
 
+  // Callback for Pokemon 2 selection
   const handlePokemon2Select = useCallback(
     (name: string, img: string, data: PokemonData) => {
       setPokemon2(name);
@@ -231,7 +216,7 @@ function Create() {
 
   return (
     <div className="min-h-screen bg-pattern p-4 flex flex-col">
-      {/* Header */}
+      {/* Page header */}
       <HeaderComp
         title="Fusion Panel"
         subtitle="Select two Pokemon to fuse"
@@ -250,10 +235,10 @@ function Create() {
         />
       </HeaderComp>
 
-      {/* Selectors and fusion button */}
+      {/* Pokemon selectors and fusion button */}
       <div className="flex-1 flex flex-col items-center justify-center mt-40">
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-5 w-full max-w-xs px-4">
-          {/* Selector 1 - Pokemon 1 */}
+          {/* Pokemon 1 selector */}
           <div className="w-full md:flex-1 shrink max-w-xs">
             <label className="block text-[var(--color-primary-light)] pokemon-font mb-2 text-center md:text-base">
               Pokemon 1
@@ -264,7 +249,7 @@ function Create() {
             />
           </div>
 
-          {/* Fusion button with animation */}
+          {/* Fusion generation button with animation */}
           <button
             onClick={handleFusion}
             disabled={isLoading || !pokemon1 || !pokemon2}
@@ -280,7 +265,7 @@ function Create() {
             {isLoading ? "⏳" : "⚡"}
           </button>
 
-          {/* Selector 2 - Pokemon 2 */}
+          {/* Pokemon 2 selector */}
           <div className="w-full md:flex-1 shrink max-w-xs">
             <label className="block text-[var(--color-primary-light)] pokemon-font mb-2 text-center text-base">
               Pokemon 2
@@ -293,7 +278,7 @@ function Create() {
         </div>
       </div>
 
-      {/* Result panel with FusionPanel - Modal */}
+      {/* Fusion result modal */}
       <FusionPanel
         fusionResult={fusionResult}
         fusionName={fusionName}

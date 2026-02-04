@@ -1,10 +1,12 @@
-
+// Props interface for HeaderComponent
 interface HeaderProps {
     title: string;
     subtitle?: string;
     children?: React.ReactNode;
 }
 
+// Fixed header component with Pokemon-themed styling
+// Displays title, optional subtitle, and navigation elements in the children
 function HeaderComp(props: HeaderProps)
 {
     const {title, subtitle, children} = props;

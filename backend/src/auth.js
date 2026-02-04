@@ -1,28 +1,19 @@
-/**
- * Autenticación OAuth2 con Google - Sistema de Login
- */
+// OAuth2 authentication with Google - User login system
+// Handles JWT token generation, validation, and session management
 
-/**
- * LIBRERÍAS
- */
-const jwt = require("jsonwebtoken");    // Crear y verificar JWT tokens
-const axios = require("axios");         // Hacer peticiones HTTP a Google
+// Import required dependencies
+const jwt = require("jsonwebtoken");    // Create and verify JWT tokens
+const axios = require("axios");         // Make HTTP requests to Google APIs
 
-/**
- * VARIABLES DE CONFIGURACIÓN
- */
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;                      // ID de aplicación Google
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;              // Secret de Google (confidencial)
-const JWT_SECRET = process.env.JWT_SECRET;                                  // Clave secreta para firmar tokens
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";                  // Duración del token (7 días por defecto)
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";     // URL del servidor Backend
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";   // URL del servidor Frontend
+// Load environment variables
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-/**
- * FUNCIONES AUXILIARES
- */
-
-// Generar JWT token
+// Generate JWT token for authenticated user
 const generateJWT = (user) => {
   return jwt.sign(
     {
@@ -35,7 +26,7 @@ const generateJWT = (user) => {
   );
 };
 
-// Verificar JWT token
+// Verify and decode JWT token
 const verifyJWT = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
@@ -44,13 +35,8 @@ const verifyJWT = (token) => {
   }
 };
 
-/**
- *  RUTAS Y CONTROLADORES DE AUTENTICACIÓN
- */
-
-// 1. Ruta para inicio de sesion con Google
-//  - Crea una URL de autenticación de Google
-//  - Redirige al usuario a Google para que ingrese sus credenciales
+// Step 1: Initiate Google OAuth flow
+// Creates authorization URL and redirects user to Google login
 const googleAuthUrl = (req, res) => {
   const scopes = "openid profile email";
   const redirectUri = `${BACKEND_URL}/api/auth/callback`;
@@ -65,19 +51,18 @@ const googleAuthUrl = (req, res) => {
   res.redirect(googleAuthUrl);
 };
 
-// 2. Callback después de la autorización de Google
-//  - Google devuelve un code después de autorizar
-//  - Intercambiamos ese code por un token de Google
-//  - Obtenemos los datos del usuario
-//  - Generamos nuestro JWT
+// Step 2: Handle Google OAuth callback
+// Exchanges authorization code for Google tokens and user data
+// Generates and returns our custom JWT
 const googleAuthCallback = async (req, res) => {
   const { code } = req.query;
 
   if (!code) {
     return res.status(400).json({ error: "No authorization code" });
   }
+  
   try {
-    // Intercambiar código por token
+    // Exchange authorization code for access token
     const response = await axios.post("https://oauth2.googleapis.com/token", {
       client_id: GOOGLE_CLIENT_ID,
       client_secret: GOOGLE_CLIENT_SECRET,
@@ -86,23 +71,23 @@ const googleAuthCallback = async (req, res) => {
       redirect_uri: `${BACKEND_URL}/api/auth/callback`,
     });
 
-    // Obetner información del usuarion
+    // Get user information using access token
     const userResponse = await axios.get(
       "https://www.googleapis.com/oauth2/v2/userinfo",
       { headers: { Authorization: `Bearer ${response.data.access_token}` } }
     );
 
-    // Usuario
+    // Create user object from Google data
     const user = {
       id: userResponse.data.id,
       email: userResponse.data.email,
       name: userResponse.data.name,
     };
 
-    // Generación del JWT propio
+    // Generate our custom JWT token
     const token = generateJWT(user);
 
-    // Redirección al frontend
+    // Redirect to frontend with authentication data
     res.redirect(
       `${FRONTEND_URL}?token=${token}&user=${encodeURIComponent(
         JSON.stringify(user)
@@ -114,9 +99,8 @@ const googleAuthCallback = async (req, res) => {
   }
 };
 
-// 3. Validar token de Google y devolver JWT nuestro
-// El frontend envía el token JWT de Google
-// El backend lo valida con Google y devuelve un JWT propio
+// Step 3: Validate Google JWT token from frontend
+// Decodes and validates Google token, returns our custom JWT
 const googleTokenValidation = async (req, res) => {
   const { googleToken } = req.body;
 
@@ -125,16 +109,14 @@ const googleTokenValidation = async (req, res) => {
   }
 
   try {
-    // Decodificar el ID token de Google (es un JWT)
-    // El token tiene formato: header.payload.signature
+    // Decode Google JWT token (format: header.payload.signature)
     const parts = googleToken.split(".");
 
     if (parts.length !== 3) {
       return res.status(400).json({ error: "Invalid token format" });
     }
 
-    // Decodificar el payload (segunda parte)
-    // Agregar padding si es necesario (= caracteres)
+    // Decode payload (second part) with base64 decoding
     let payload = parts[1];
     payload += "=".repeat(4 - (payload.length % 4));
 
@@ -142,7 +124,7 @@ const googleTokenValidation = async (req, res) => {
 
     const { email, name, picture, sub } = decoded;
 
-    // Crear usuario object
+    // Create user object from decoded token
     const user = {
       id: sub,
       email,
@@ -150,10 +132,10 @@ const googleTokenValidation = async (req, res) => {
       picture,
     };
 
-    // Generar nuestro JWT
+    // Generate our custom JWT token
     const token = generateJWT(user);
 
-    // Devolver token y datos del usuario
+    // Return authentication response
     res.json({
       token,
       user,
@@ -165,38 +147,37 @@ const googleTokenValidation = async (req, res) => {
   }
 };
 
-// 4. Logout
+// Step 4: User logout
 const logout = (req, res) => {
   res.json({ message: "Logged out successfully" });
 };
 
-// 4. Middleware de Autenticación
+// Step 5: Authentication middleware for protected routes
+// Validates JWT token from Authorization header and attaches user to request
 const authMiddleware = (req, res, next) => {
   
-  // Obtenicon del token del header authorization
+  // Extract token from Authorization header
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer '))
-    return res.status(401).json({ error: "No authoritation header " });
+    return res.status(401).json({ error: "No authorization header" });
 
-  // Separar "Bearer" del token
+  // Extract token from "Bearer <token>" format
   const token = authHeader.split(" ")[1];
   if (!token) return res.status(401).json({ error: "No token provided" });
 
-  // Verificación de la validez del token
+  // Verify JWT token validity
   const decoded = verifyJWT(token);
   if (!decoded)
     return res.status(401).json({ error: "Invalid or expired token" });
 
-  // Guardar el usuario en req para poder trabajar con el después
+  // Attach decoded user data to request object
   req.user = decoded;
 
-  // Pasar al siguiente middleware
+  // Continue to next middleware
   next();
 };
 
-/**
- * EXPORTS - Funciones disponibles para otros archivos
- */
+// Export authentication functions
 module.exports = {
   generateJWT,
   verifyJWT,

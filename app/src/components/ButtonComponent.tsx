@@ -1,9 +1,6 @@
-/**
- * Componente ButtonComponent - Intento de boton simple reutilizable para todo el proyecto
- */
 import { useState } from "react";
 
-// Interfaz que define los componentes necesarios para usar el botón
+// Props interface for ButtonComponent configuration
 interface ButtonComponentProps {
     text: string;
     onClick?: () => void;
@@ -12,21 +9,22 @@ interface ButtonComponentProps {
     disabled?: boolean;
 }
 
-// Función principal del botón (definición del componente en si)
+// Reusable button component with customizable variants and sizes
+// Provides hover effects with animations and multiple style options
 function ButtonComponent(props: ButtonComponentProps) {
 
-    const [isHovered, setIsHovered] = useState(false); // Control del button hover
+    const [isHovered, setIsHovered] = useState(false);
 
-    // Clase base para todas las variantes del boton
+    // Base styling applied to all button variants
     const baseClasses = "font-bold uppercase transition-all duration-300 rounded cursor-pointer pokemon-font-clean";
 
-    // Variantes de color
+    // Color variants with hover effects
     const colorClasses = {
         header: "bg-[var(--color-primary)] transition-all hover:bg-[var(--color-primary-dark)] hover:shadow-[0_0_15px_var(--color-primary-light)] hover:-translate-y-1",
         primary: "bg-[var(--color-primary)] transition-all hover:bg-[var(--color-primary-dark)] hover:shadow-[0_0_15px_var(--color-primary-light)] text-white",
     };
 
-    // Variantes de tamaño
+    // Size variants
     const sizeClasses = {
         small: "px-3 py-1 text-sm",
         medium: "px-5 py-2 text-base",
@@ -36,7 +34,7 @@ function ButtonComponent(props: ButtonComponentProps) {
     const variant = props.variant || "header";
     const size = props.size || "medium";
 
-    // Variación final resultante de la combinación de variables 
+    // Combine all classes
     const finalClasses = `${baseClasses} ${colorClasses[variant]} ${sizeClasses[size]}`;
 
     return (

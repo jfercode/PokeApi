@@ -1,15 +1,12 @@
-/**
- * Componente PokemonSelector - Mini Pokédex
- * Muestra nombre, imagen, número y datos del Pokémon
- */
-
 import { useState, useEffect } from "react";
 
+// Props interface for PokemonSelector component
 interface PokemonSelectorProps {
   label: string;
   onSelect?: (name: string, image: string, pokemonData: any) => void;
 }
 
+// Interface for detailed Pokemon data from PokeAPI
 interface PokemonDetail {
   id: number;
   name: string;
@@ -31,6 +28,8 @@ interface PokemonDetail {
   }>;
 }
 
+// Mini Pokedex component for selecting and displaying Pokemon details
+// Fetches Pokemon data from PokeAPI and displays comprehensive information
 function PokemonSelector(props: PokemonSelectorProps) {
   const [pokemons, setPokemons] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState("");
@@ -38,7 +37,7 @@ function PokemonSelector(props: PokemonSelectorProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [pokemonDetail, setPokemonDetail] = useState<PokemonDetail | null>(null);
 
-  // Traer lista de pokémon
+  // Fetch list of all Pokemon from PokeAPI
   useEffect(() => {
     fetch("https://pokeapi.co/api/v2/pokemon?limit=1328")
       .then((response) => response.json())
@@ -47,21 +46,20 @@ function PokemonSelector(props: PokemonSelectorProps) {
       });
   }, []);
 
-  // Traer detalles del pokémon seleccionado
+  // Fetch detailed information for selected Pokemon
   useEffect(() => {
     if (selectedPokemon) {
-      console.log("Detalles pokemon [", selectedPokemon, "]")
-
-      // Fetch principal - datos del Pokémon
       const pokeApi = import.meta.env.VITE_POKEAPI_BASE;
+      
+      // Main API call for Pokemon data
       fetch(`${pokeApi}/pokemon/${selectedPokemon}`)
         .then((response) => response.json())
         .then((data: PokemonDetail) => {
-          // Fetch secundario - datos de la especie (egg_groups)
+          // Secondary API call for species data (egg groups)
           return fetch(`${pokeApi}/pokemon-species/${selectedPokemon}`)
             .then((response) => response.json())
             .then((speciesData) => {
-              // Combinar ambos datos
+              // Combine both data sources
               const completeData = {
                 ...data,
                 egg_groups: speciesData.egg_groups
@@ -75,7 +73,7 @@ function PokemonSelector(props: PokemonSelectorProps) {
     }
   }, [selectedPokemon, props.onSelect]);
 
-  // Obtener tipos del Pokémon
+  // Extract and format Pokemon types
   const getTypes = () => {
     if (!pokemonDetail?.types) return "";
     return pokemonDetail.types
@@ -83,31 +81,31 @@ function PokemonSelector(props: PokemonSelectorProps) {
       .join(" / ");
   };
 
-  // Convertir altura de decímetros a metros
+  // Convert height from decimeters to meters
   const getHeight = () => {
     if (!pokemonDetail?.height) return "N/A";
     return (pokemonDetail.height * 0.1).toFixed(2) + "m";
   };
 
-  // Convertir peso de hectogramos a kg
+  // Convert weight from hectograms to kilograms
   const getWeight = () => {
     if (!pokemonDetail?.weight) return "N/A";
     return (pokemonDetail.weight * 0.1).toFixed(2) + "kg";
   };
 
-  // Número del Pokémon con padding
+  // Format Pokemon number with leading zeros
   const getPokemonNumber = () => {
     if (!pokemonDetail?.id) return "000";
     return pokemonDetail.id.toString().padStart(3, "0");
   };
 
-  // Obtener grupos de huevo
+  // Extract egg group names
   const getEggGroups = () => {
     if (!pokemonDetail?.egg_groups) return [];
     return pokemonDetail.egg_groups.map((eg) => eg.name.toUpperCase());
   };
 
-  // Obtener habilidades principales (no ocultas)
+  // Get non-hidden abilities
   const getAbilities = () => {
     if (!pokemonDetail?.abilities) return [];
     return pokemonDetail.abilities
@@ -117,10 +115,10 @@ function PokemonSelector(props: PokemonSelectorProps) {
 
   return (
     <div className="w-72">
-      {/* MINI POKÉDEX */}
+      {/* Pokemon details card */}
       {pokemonDetail ? (
         <div className="pokedex-card bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] rounded-2xl p-6 shadow-2xl border-4 border-[var(--color-primary-light)]">
-          {/* Header con número */}
+          {/* Header with Pokemon number */}
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-white pokemon-font-clean text-sm">
               {pokemonDetail.name.toUpperCase()}
@@ -130,7 +128,7 @@ function PokemonSelector(props: PokemonSelectorProps) {
             </span>
           </div>
 
-          {/* Imagen en círculo */}
+          {/* Pokemon sprite in circle */}
           <div className="cylinder mb-6 flex items-center justify-center bg-[var(--color-primary-dark)] rounded-full w-40 h-40 mx-auto border-4 border-[var(--color-primary-light)]">
             <img
               src={pokemonDetail.sprites.front_default}
@@ -139,9 +137,9 @@ function PokemonSelector(props: PokemonSelectorProps) {
             />
           </div>
 
-          {/* Tipos */}
+          {/* Pokemon types */}
           <div className="mb-4 text-center">
-            <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">TIPO</p>
+            <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">TYPE</p>
             <div className="flex gap-2 justify-center flex-wrap">
               {pokemonDetail.types.map((type, idx) => (
                 <span
@@ -154,21 +152,22 @@ function PokemonSelector(props: PokemonSelectorProps) {
             </div>
           </div>
 
-          {/* Stats: Altura y Peso */}
+          {/* Height and weight stats */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="bg-black bg-opacity-30 rounded-lg p-3 text-center">
-              <p className="text-[var(--color-primary-light)] text-xs font-bold">ALTURA</p>
+              <p className="text-[var(--color-primary-light)] text-xs font-bold">HEIGHT</p>
               <p className="text-white font-bold">{getHeight()}</p>
             </div>
             <div className="bg-black bg-opacity-30 rounded-lg p-3 text-center">
-              <p className="text-[var(--color-primary-light)] text-xs font-bold">PESO</p>
+              <p className="text-[var(--color-primary-light)] text-xs font-bold">WEIGHT</p>
               <p className="text-white font-bold">{getWeight()}</p>
             </div>
           </div>
-          {/* Grupos de Huevo */}
+          
+          {/* Egg groups */}
           <div className="bg-black bg-opacity-30 rounded-lg p-3 mt-3 mb-4">
             <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">
-              GRUPOS DE HUEVO
+              EGG GROUPS
             </p>
             <div className="flex gap-2 flex-wrap">
               {getEggGroups().map((eggGroup, idx) => (
@@ -181,10 +180,11 @@ function PokemonSelector(props: PokemonSelectorProps) {
               ))}
             </div>
           </div>
-          {/* Habilidades */}
+          
+          {/* Abilities */}
           <div className="bg-black bg-opacity-30 rounded-lg p-3">
             <p className="text-[var(--color-primary-light)] text-xs font-bold mb-2">
-              HABILIDADES
+              ABILITIES
             </p>
             <div className="flex gap-2 flex-wrap">
               {getAbilities().map((ability, idx) => (
@@ -199,15 +199,15 @@ function PokemonSelector(props: PokemonSelectorProps) {
           </div>
         </div>
       ) : (
-        // Mientras no hay selección
+        // Placeholder while no Pokemon is selected
         <div className="pokedex-placeholder bg-[var(--color-primary-dark)] rounded-2xl p-6 shadow-2xl border-4 border-[var(--color-primary-light)] h-96 flex items-center justify-center">
           <p className="text-[var(--color-primary-light)] text-center font-mono">
-            Selecciona un Pokémon para ver detalles
+            Select a Pokemon to see details
           </p>
         </div>
       )}
 
-      {/* Selector búsqueda por texto */}
+      {/* Pokemon search input */}
       <div className="mt-6">
         <h3 className="text-[var(--color-primary-light)] text-xs mb-3 pokemon-font-small">
           {props.label}
@@ -215,7 +215,7 @@ function PokemonSelector(props: PokemonSelectorProps) {
         <div className="relative">
           <input
             type="text"
-            placeholder="Buscar Pokémon..."
+            placeholder="Search Pokemon..."
             value={searchText}
             onChange={(e) => {
               setSearchText(e.target.value);
@@ -226,14 +226,14 @@ function PokemonSelector(props: PokemonSelectorProps) {
             className="w-full p-3 bg-black text-[var(--color-primary-light)] border-2 border-[var(--color-primary-light)] rounded pokemon-font-small text-xs hover:border-[var(--color-primary)] transition focus:outline-none focus:border-[var(--color-primary)]"
           />
 
-          {/* Sugerencias - Lista filtrada */}
+          {/* Search suggestions dropdown */}
           {showSuggestions && searchText && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-black border-2 border-[var(--color-primary-light)] rounded max-h-48 overflow-y-auto z-50">
               {pokemons
                 .filter((pokemon: any) =>
                   pokemon.name.toUpperCase().includes(searchText.toUpperCase())
                 )
-                .slice(0, 10) // Limitar a 10 resultados
+                .slice(0, 10)
                 .map((pokemon: any) => (
                   <div
                     key={pokemon.name}
@@ -256,51 +256,3 @@ function PokemonSelector(props: PokemonSelectorProps) {
 }
 
 export default PokemonSelector;
-
-/**
- * POKEMONSELECTOR.TSX - MINI POKÉDEX
- * ═══════════════════════════════════════════════════════════════
- *
- * QUÉ ES:
- * Mini Pokédex que muestra datos detallados de cada Pokémon:
- * - Nombre y número Pokédex
- * - Imagen del Pokémon
- * - Tipos (fuego, agua, planta, etc)
- * - Altura y peso
- * - Información de características
- *
- * INTERFAZ (PokemonDetail):
- * - id: número del Pokémon en la Pokédex
- * - name: nombre del Pokémon
- * - sprites.front_default: URL de la imagen
- * - height: altura en decímetros
- * - weight: peso en hectogramos
- * - types: array de tipos del Pokémon
- *
- * FUNCIONES AUXILIARES:
- * - getTypes(): Retorna tipos del Pokémon formateados
- * - getHeight(): Convierte decímetros a metros
- * - getWeight(): Convierte hectogramos a kg
- * - getPokemonNumber(): Formatea número con ceros (001, 025, etc)
- *
- * FLUJO:
- * 1. Usuario selecciona Pokémon en dropdown
- * 2. useEffect obtiene datos de PokeAPI
- * 3. setPokemonDetail(data) con info completa
- * 4. onSelect() envía datos completos a parent (Create.tsx)
- * 5. Renderiza mini Pokédex con todos los datos
- *
- * DATOS ENVIADOS AL PARENT:
- * La función onSelect ahora recibe:
- * - name: nombre del Pokémon
- * - image: URL de la imagen
- * - pokemonData: OBJETO COMPLETO con todos los datos
- *   └─ Esto permite que Create.tsx use mucha más info para la fusión IA
- *
- * ESTILOS:
- * - Fondo rojo degradado (como Pokédex real)
- * - Borde amarillo (#ffcc00)
- * - Imagen en círculo blanco
- * - Tipos en badges amarillos
- * - Stats en boxes oscuros
- */

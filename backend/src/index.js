@@ -1,35 +1,28 @@
-/** 
- *  Initial configuration 
- */
-require('dotenv').config();             //  Load environment variables
-const express = require('express');     //  Import express
-const cors = require('cors');           //  Enable communication with frontend
+// Load environment variables from .env file
+require('dotenv').config();
 
-const { googleAuthURL, googleAuthCallback, googleTokenValidation, logout, authMiddleware } = require('./auth.js');    // Import authentication functions
-const { generateFusionImage } = require('./generateFusion');  // Import fusion generation function
+// Import required dependencies
+const express = require('express');
+const cors = require('cors');
 
-/**
- *  App creation and port configuration
- */
-const app = express();                  //  Create App
-const PORT = process.env.PORT;          //  Configure port from environment variables
+// Import authentication and fusion generation functions
+const { googleAuthURL, googleAuthCallback, googleTokenValidation, logout, authMiddleware } = require('./auth.js');
+const { generateFusionImage } = require('./generateFusion');
 
-/**
- * Middlewares
- */
-app.use(cors());                    // Enable CORS
-app.use(express.json());            // Server understands JSON in requests
+// Initialize Express application
+const app = express();
+const PORT = process.env.PORT;
 
-/**
- * Health check endpoint
- */
+// Configure middleware
+app.use(cors());                // Enable cross-origin requests
+app.use(express.json());        // Parse JSON request bodies
+
+// Health check endpoint for deployment verification
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend is running' });
 });
 
-/**
- * Main route (/)
- */
+// Main API endpoint - returns general information
 app.get('/', (req, res) => {
   res.json({ 
     message: 'PokeAPI Backend',
@@ -41,44 +34,36 @@ app.get('/', (req, res) => {
   });
 });
 
-/**
- * Authentication routes (NO protection)
- */
-app.get('/api/auth/google', googleAuthURL);         // Start login with Google
-app.get('/api/auth/callback', googleAuthCallback);  // Google redirects here with code
-app.post('/api/auth/google-token', googleTokenValidation);  // Validate Google token from frontend
-app.get('/api/auth/logout', logout);                // Session logout
+// Authentication routes - No authentication required
+app.get('/api/auth/google', googleAuthURL);                  // Start Google OAuth flow
+app.get('/api/auth/callback', googleAuthCallback);           // Google OAuth callback
+app.post('/api/auth/google-token', googleTokenValidation);   // Validate Google JWT token
+app.get('/api/auth/logout', logout);                         // User logout
 
-/**
- * Image generation endpoint (PUBLIC - NO authentication required)
- */
+// Pokemon fusion generation endpoint - Public (no authentication required)
 app.post('/api/generate-fusion', async (req, res) => {
   try {
     const { pokemon1Data, pokemon2Data } = req.body;
     
-    // Validate required data
+    // Validate request contains required Pokemon data
     if (!pokemon1Data || !pokemon2Data) {
       return res.status(400).json({ error: 'Missing pokemon data' });
     }
     
-    // Generate fusion image
+    // Generate AI fusion image
     const result = await generateFusionImage(pokemon1Data, pokemon2Data);
     
-    // Return result
+    // Return fusion result with image URL
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-/**
- * Protect all other /api routes with JWT
- */
-app.use('/api', authMiddleware);    // Protect all routes that start with /api AFTER auth
+// Protect all remaining /api routes with JWT authentication middleware
+app.use('/api', authMiddleware);
 
-/**
- * Api routes placeholder 
- */
+// API routes placeholder
 app.get('/api', (req, res) => {
   res.json({ message: 'API routes coming soon' });
 });
@@ -91,38 +76,39 @@ app.get('/api/user/profile', authMiddleware, (req, res) => {
   })
 });
 
-// Get user fusions from database (to implement)
+// Get user fusions from database (implementation pending)
 app.get('/api/user/fusions', authMiddleware, (req, res) =>{
   res.json({
     message: 'User fusions',
     user: req.user.id,
-    fusions: [] // Fusions from database
+    fusions: []
   })
 });
 
-/**
- *  CRUD ENDPOINTS - Fusion data management
- */
-// GET - Get all fusions from authenticated user
+// CRUD Endpoints for Fusion data management
+
+// GET all user fusions
 app.get('/api/fusions', authMiddleware, (req, res) =>{
   const userId = req.user.id;
 
   res.json({
     message: 'User fusions',
     userId: userId,
-    fusion: []  // Change this line
+    fusion: []
   })
 });
 
-// POST - Create a new fusion
+// POST create a new fusion
 app.post('/api/fusions', authMiddleware, (req, res) => {
   
   const userId = req.user.id;
   const {name, pokemon1, pokemon2, image} = req.body;
 
+  // Validate all required fields are present
   if (!name || !pokemon1 || !pokemon2 || !image)
       return res.status(400).json({ error: 'Missing required fields' });
 
+  // Create fusion object
   const fusion = {
     id: Date.now().toString(),
     userId: userId,
@@ -132,13 +118,14 @@ app.post('/api/fusions', authMiddleware, (req, res) => {
     image, 
     createdAt: new Date().toISOString()
   };
+
   res.status(201).json({
     message: 'Fusion created successfully',
     fusion
   });
 });
 
-// DELETE - Delete an existing fusion
+// DELETE an existing fusion
 app.delete('/api/fusions/:id', authMiddleware, (req, res) => {
 
   const fusionId = req.params.id;
